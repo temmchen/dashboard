@@ -9,7 +9,9 @@
       Rückweg-Knopf in HTML-Seiten.
 
    Strategien
-   - Hülle, Index und Manifest: network-first, Cache als Rückfall.
+   - Hülle, Index und Manifest: network-first, Cache als Rückfall. Die Seite holt Index und
+     Manifest mit frischer Adresse (?t=…, gegen den Zwischenspeicher von GitHub Pages); im Cache
+     liegt die Antwort trotzdem unter der Adresse ohne Zusatz – ein Eintrag je Datei.
    - Tresordateien (vaults/…/f/….enc): cache-first – die Kennung (fid) ändert sich,
      sobald der Inhalt sich ändert, der Cache kann also nie veralten.
    - Fremde Origins werden nicht angefasst.
@@ -53,6 +55,10 @@ self.addEventListener("activate", ev => {
   ev.waitUntil((async () => {
     const namen = await caches.keys();
     await Promise.all(namen.filter(n => n !== CACHE).map(n => caches.delete(n)));
+    try {                                                  // Altlasten: Einträge mit ?…-Zusatz (frühere Fassung)
+      const cache = await caches.open(CACHE);
+      for (const r of await cache.keys()) if (r.url.includes("?")) await cache.delete(r);
+    } catch (e) { /* egal */ }
     await self.clients.claim();
   })());
 });
@@ -265,12 +271,14 @@ async function cacheFirst(req) {
 
 async function networkFirst(req) {
   const cache = await caches.open(CACHE);
+  // Im Cache ohne ?t=…/?d=…-Zusatz ablegen: je Datei genau ein Eintrag, der jüngste gewinnt.
+  const schluessel = req.url.includes("?") ? new Request(req.url.split("?")[0]) : req;
   try {
     const antwort = await fetch(req);
-    if (antwort && antwort.ok) cache.put(req, antwort.clone()).catch(() => {});
+    if (antwort && antwort.ok) cache.put(schluessel, antwort.clone()).catch(() => {});
     return antwort;
   } catch (e) {
-    const treffer = await cache.match(req, { ignoreSearch: true })
+    const treffer = await cache.match(schluessel, { ignoreSearch: true })
       || (req.mode === "navigate" ? await cache.match("./index.html") : null);
     if (treffer) return treffer;
     throw e;

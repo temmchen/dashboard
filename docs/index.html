@@ -68,6 +68,10 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
 #kopf .rechts{margin-left:auto;flex:none;display:flex;gap:8px}
 .rund{height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:transparent;color:var(--tx2);cursor:pointer;font-size:14px;white-space:nowrap}
 .rund.start{color:var(--acc);border-color:rgba(22,197,232,.4);font-weight:650}
+.rund.symbol{width:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;color:var(--acc);border-color:rgba(22,197,232,.4)}
+.rund.symbol svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+.rund.symbol.dreht svg{animation:dreh .8s linear infinite}
+.rund.symbol:disabled{opacity:.7;cursor:default}
 .marke{padding:2px 8px;border-radius:999px;background:#3a1f1f;color:#f8b4b4;font-size:12px}
 
 /* Startseite: Rechner oben, vier Kacheln */
@@ -172,6 +176,8 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
 #toast{position:fixed;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom) + 18px);z-index:110;background:#3a1f1f;color:#f8d0d0;
   padding:12px 16px;border-radius:14px;font-size:15px;text-align:center;opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s;pointer-events:none}
 #toast.zeig{opacity:1;transform:translateY(0)}
+#toast.ok{background:#14321f;color:#bbf7d0}
+#toast.info{background:#1a2538;color:#cfe3ff}
 @media (min-width:700px){#toast{max-width:560px;margin:0 auto}}
 </style>
 </head>
@@ -206,7 +212,10 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
       <h1 id="kopf-titel">Dashboard</h1>
       <div class="sub"><span id="kopf-schuljahr"></span><span id="kopf-stand"></span><span class="marke versteckt" id="kopf-offline">Offline</span></div>
     </div>
-    <div class="rechts"><button class="rund" id="knopf-abmelden" type="button">Abmelden</button></div>
+    <div class="rechts">
+      <button class="rund symbol" id="knopf-aktualisieren" type="button" title="Liste aktualisieren" aria-label="Liste aktualisieren"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></button>
+      <button class="rund" id="knopf-abmelden" type="button">Abmelden</button>
+    </div>
   </header>
   <main>
     <!-- Startseite -->
@@ -254,6 +263,7 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
 
     <p class="fuss" id="fuss">Alle Inhalte liegen nur als AES-256-Chiffrat auf GitHub Pages und werden erst hier nach der Anmeldung entschlüsselt.
       In Dashboards und Präsentationen: Wischen blättert, Tippen zeigt die Bedienleiste; <kbd>‹ Dashboard</kbd> führt hierher zurück.
+      <kbd>↻</kbd> oben holt die neuesten Listen, wenn am Mac gerade veröffentlicht wurde.
       Angemeldet als <span id="fuss-wer"></span>.</p>
   </main>
 </div>
@@ -311,10 +321,13 @@ function fmtMiB(b){ return b ? (b / 1048576).toFixed(1).replace(".", ",") + " MB
 const sichereListe = l => Array.isArray(l) ? l : [];
 const istNetzfehler = e => e instanceof TypeError || /Failed to fetch|Load failed|NetworkError/i.test(String(e && e.message || ""));
 const fehlerText = e => istNetzfehler(e) ? "Keine Verbindung – und dieser Eintrag ist noch nicht offline gespeichert." : (e && e.message || String(e));
-function fensterHoeren(name, fn, opt){ window.addEventListener(name, fn, opt); fensterListener.push([name, fn, opt]); }
+function fensterHoeren(name, fn, opt, ziel){ ziel = ziel || window; ziel.addEventListener(name, fn, opt); fensterListener.push([name, fn, opt, ziel]); }
 function spaeter(fn, ms){ const t = setTimeout(fn, ms); timer.push(t); return t; }
 let toastTimer = null;
-function toast(text){ const t = $("#toast"); t.textContent = text; t.classList.add("zeig"); clearTimeout(toastTimer); toastTimer = spaeter(() => t.classList.remove("zeig"), 4200); }
+function toast(text, art){ const t = $("#toast"); t.textContent = text; t.className = "zeig" + (art ? " " + art : ""); clearTimeout(toastTimer); toastTimer = spaeter(() => t.classList.remove("zeig"), 4200); }
+/* Frische Adresse für Index und Manifest: der Zusatz ?t=… umgeht den Zwischenspeicher von GitHub Pages
+   (bis zu 10 Minuten), der Service Worker legt die Antwort trotzdem unter der Adresse ohne Zusatz ab. */
+const frisch = url => url + (url.includes("?") ? "&" : "?") + "t=" + Date.now().toString(36);
 function loginStatus(text, fehler){ const s = $("#login-status"); s.textContent = text || ""; s.classList.toggle("fehler", !!fehler); }
 function ladenZeigen(text){ $("#laden-text").textContent = text || "Entschlüssele …"; $("#laden").classList.remove("versteckt"); }
 function ladenVerbergen(){ $("#laden").classList.add("versteckt"); }
@@ -348,8 +361,8 @@ async function entschluesseleBlock(key, puffer){
 
 /* ─────────────────────────── Sitzung & Daten ─────────────────────────── */
 async function ladeIndex(){
-  const r = await fetch("vaults/index.json", {cache:"no-store"});
-  if(!r.ok) throw new Error("index.json fehlt (" + r.status + ")");
+  const r = await fetch(frisch("vaults/index.json"), {cache:"no-store"});
+  if(!r.ok){ const err = new Error("index.json fehlt (" + r.status + ")"); err.status = r.status; throw err; }
   return r.json();
 }
 async function pruefePasswort(passwort, idx){
@@ -393,7 +406,7 @@ async function ladeManifest(session){
   const v = sichereListe(session.vaults)[0];
   if(!v) throw new Error("Kein Tresor in der Sitzung");
   const key = await vaultKey(v.id);
-  const r = await fetch(v.manifest, {cache:"no-store"});
+  const r = await fetch(frisch(v.manifest), {cache:"no-store"});
   if(!r.ok){ const err = new Error("Manifest nicht erreichbar (" + r.status + ")"); err.status = r.status; throw err; }
   const m = JSON.parse(new TextDecoder().decode(await entschluesseleBlock(key, await r.arrayBuffer())));
   m._vault = v.id;
@@ -668,16 +681,16 @@ function render(){
   $("#fuss-wer").textContent = (SESSION && SESSION.label) || "Leser";
   $("#kopf-offline").classList.toggle("versteckt", navigator.onLine !== false);
   renderStart(); renderLerndashboards(); renderSimulationen(); renderPraesentationen(); renderRepos();
-  ansichtZeigen(ANSICHT);
+  ansichtZeigen(ANSICHT, true);
 }
-function ansichtZeigen(name){
+function ansichtZeigen(name, ohneSprung){
   if(name !== "start" && !BEREICHE.includes(name)) name = "start";
   ANSICHT = name;
   for(const a of ["start", ...BEREICHE]) $("#ansicht-" + a).classList.toggle("versteckt", a !== name);
   $("#knopf-start").classList.toggle("versteckt", name === "start");
   $("#kopf-bild").classList.toggle("versteckt", name !== "start");
   $("#kopf-titel").textContent = name === "start" ? "Dashboard" : KACHELN[name].name;
-  window.scrollTo(0, 0);
+  if(!ohneSprung) window.scrollTo(0, 0);        // beim Neuzeichnen nach einer Aktualisierung bleibt die Stelle
 }
 function appZeigen(){
   $("#anmeldung").classList.add("versteckt");
@@ -746,7 +759,7 @@ else if(a){a.classList.add('dm-immer');}
 `;
 }
 function aufraeumen(){
-  for(const [name, fn, opt] of fensterListener) window.removeEventListener(name, fn, opt);
+  for(const [name, fn, opt, ziel] of fensterListener) (ziel || window).removeEventListener(name, fn, opt);
   fensterListener.length = 0;
   for(const t of timer) clearTimeout(t);
   timer.length = 0;
@@ -791,18 +804,102 @@ async function oeffnen(id, hash, rel){
   }
 }
 
-/* ─────────────────────────── Aktualisierung ─────────────────────────── */
-async function pruefeAktualisierung(){
+/* ─────────────────────────── Aktualisierung ───────────────────────────
+   Knopf ↻ im Kopf – und still beim Zurückkehren in die App oder wenn das Netz wiederkommt:
+   index.json frisch holen (ohne Zwischenspeicher), bei neuem Build das Manifest neu laden,
+   Listen neu zeichnen und melden, was dazugekommen ist. Gibt es den Tresor der Sitzung nicht
+   mehr oder passt der Schlüssel nicht (neu verschlüsselt), geht es zurück zur Anmeldung. */
+let aktualisiertUm = 0;              // letzte erfolgreiche Prüfung (ms), drosselt die stille Prüfung
+let aktualisierungLaeuft = false;
+const istSchluesselfehler = e => !!e && e.name === "OperationError";       // AES-GCM: Schlüssel passt nicht
+function schluesselfehler(){ const e = new Error("Der Tresor wurde neu verschlüsselt"); e.name = "OperationError"; return e; }
+function kennungen(){
+  const k = new Set();
+  for(const e of alleEintraege()) k.add(e.bereich + ":" + e.id);
+  for(const r of repos()) k.add("repo:" + r.name);
+  return k;
+}
+async function indexAbgleichen(){
+  /* → {stand:"unklar"} (Index nicht ladbar) · {stand:"gleich"} · {stand:"neu", build, manifest}.
+     Wirft einen Schlüsselfehler, wenn der Tresor der Sitzung im Index fehlt. Ändert die Sitzung nicht. */
+  let idx;
+  try{ idx = await ladeIndex(); }catch(e){ return {stand:"unklar", fehler:e}; }
+  const v = SESSION.vaults[0];
+  const iv = sichereListe(idx.vaults).find(x => x.id === v.id);
+  if(!iv) throw schluesselfehler();
+  const build = idx.build || "";
+  return { stand: build && build === SESSION.build ? "gleich" : "neu", build, manifest: iv.manifest || v.manifest };
+}
+function neuVerschluesselt(){
+  swVergessen(); sitzungVerwerfen(); SESSION = null; M = null; vaultKeys.clear();
+  try{ history.replaceState(null, "", BASIS); }catch(e){}
+  loginZeigen("Der Tresor wurde neu verschlüsselt – bitte neu anmelden.", true);
+}
+const nichtErreichbar = e => istNetzfehler(e) || navigator.onLine === false
+  ? "Keine Verbindung – die Liste bleibt, wie sie ist."
+  : `Portal gerade nicht erreichbar (${e && (e.status || e.message) || "?"}) – gleich noch einmal versuchen.`;
+async function aktualisieren(manuell){
+  if(!SESSION || !M || aktualisierungLaeuft) return;
+  aktualisierungLaeuft = true;
+  const knopf = $("#knopf-aktualisieren");
+  knopf.disabled = true; knopf.classList.toggle("dreht", !!manuell);
   try{
-    const idx = await ladeIndex();
-    if(!idx.build || idx.build === SESSION.build) return;
-    for(const v of SESSION.vaults){ const iv = sichereListe(idx.vaults).find(x => x.id === v.id); if(iv && iv.manifest) v.manifest = iv.manifest; }
-    M = await ladeManifest(SESSION);
-    SESSION.build = idx.build;
-    sitzungSpeichern(SESSION, MERKEN);
+    const a = await indexAbgleichen();
+    if(a.stand === "unklar"){ if(manuell) toast(nichtErreichbar(a.fehler)); return; }
+    aktualisiertUm = Date.now();
+    if(a.stand === "gleich"){ if(manuell) toast("Schon aktuell · Stand " + fmtStand(M.erstellt), "ok"); return; }
+    const vorher = kennungen();
+    const v = SESSION.vaults[0], manifestAlt = v.manifest;
+    v.manifest = a.manifest;
+    let neu;
+    try{ neu = await ladeManifest(SESSION); }
+    catch(e){
+      v.manifest = manifestAlt;
+      if(istSchluesselfehler(e)) throw e;
+      if(manuell) toast(nichtErreichbar(e));
+      return;
+    }
+    M = neu;
+    // GitHub Pages liefert kurz nach dem Veröffentlichen manchmal schon den neuen Index, aber noch das alte
+    // Manifest – dann den Build nicht als „gesehen“ merken, damit das nächste ↻ es erneut versucht.
+    const vollstaendig = !neu.build || neu.build === a.build;
+    if(vollstaendig){ SESSION.build = a.build; sitzungSpeichern(SESSION, MERKEN); }
     render();
     tresorAnSW();
-  }catch(e){ /* offline oder Tresor neu verschlüsselt – zeigt sich beim nächsten Öffnen */ }
+    if(!vollstaendig){ if(manuell) toast("Der neue Stand ist noch nicht ganz online – gleich noch einmal ↻ drücken.", "info"); return; }
+    const nachher = kennungen();
+    const dazu = [...nachher].filter(k => !vorher.has(k)).length, weg = [...vorher].filter(k => !nachher.has(k)).length;
+    const was = [dazu ? (dazu === 1 ? "1 neuer Eintrag" : dazu + " neue Einträge") : "", weg ? weg + " entfernt" : ""].filter(Boolean).join(" · ") || "keine neuen Einträge";
+    toast(`Aktualisiert · Stand ${fmtStand(M.erstellt)} · ${was}`, "ok");
+  }catch(e){
+    console.warn("Aktualisierung:", e);
+    if(istSchluesselfehler(e)) neuVerschluesselt();
+    else if(manuell) toast("Aktualisierung fehlgeschlagen: " + (e && e.message || e));
+  }finally{
+    aktualisierungLaeuft = false;
+    knopf.disabled = false; knopf.classList.remove("dreht");
+  }
+}
+async function appAktualisieren(){
+  /* Neue Fassung der App selbst (index.html, sw.js)? Das prüft der Browser sonst nur beim Öffnen –
+     eine Web-App auf dem Home-Bildschirm bleibt oft tagelang offen. Ist ein neuer Worker aktiv,
+     wird die Seite einmal neu geladen (gleicher Bereich). */
+  if(!("serviceWorker" in navigator)) return;
+  try{
+    const reg = await navigator.serviceWorker.getRegistration();
+    if(!reg || !reg.active) return;                 // noch die Erstinstallation – keine neue Fassung
+    await reg.update();
+    const neu = reg.installing || reg.waiting;
+    if(!neu || neu === reg.active) return;
+    const fertig = () => {
+      if(neu.state !== "activated") return;
+      neu.removeEventListener("statechange", fertig);
+      toast("Neue Fassung der App – lade neu …", "info");
+      spaeter(() => location.replace(BASIS + (ANSICHT !== "start" ? "?b=" + ANSICHT : "")), 900);
+    };
+    neu.addEventListener("statechange", fertig);
+    fertig();
+  }catch(e){ /* offline o. ä. */ }
 }
 
 /* ─────────────────────────── Ereignisse ─────────────────────────── */
@@ -821,6 +918,7 @@ $("#login-form").addEventListener("submit", async ev => {
     sitzungSpeichern(session, MERKEN);
     lsSchreiben(NAME_KEY, session.label || $("#login-name").value || "Tom");
     $("#login-pw").value = ""; loginStatus("");
+    aktualisiertUm = Date.now();
     appZeigen();
     tresorAnSW();
     if(GEWUENSCHT){ const g = GEWUENSCHT; GEWUENSCHT = null; oeffnen(g.id, g.hash, g.rel); }
@@ -850,6 +948,7 @@ $("#app").addEventListener("input", ev => {
   renderer[s.dataset.fm]();
 });
 $("#qr").addEventListener("click", () => $("#qr").classList.add("versteckt"));
+$("#knopf-aktualisieren").addEventListener("click", () => { aktualisieren(true); appAktualisieren(); });
 $("#knopf-abmelden").addEventListener("click", () => {
   swVergessen();
   sitzungVerwerfen(); SESSION = null; M = null; vaultKeys.clear();
@@ -864,8 +963,11 @@ async function start(){
   if(p.get("b") && BEREICHE.includes(p.get("b"))) ANSICHT = p.get("b");
   try{ const z = sessionStorage.getItem(ZIEL_KEY); if(z){ sessionStorage.removeItem(ZIEL_KEY); GEWUENSCHT = JSON.parse(z); } }catch(e){}
   if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(e => console.warn("Service Worker:", e)); }
-  fensterHoeren("online", () => $("#kopf-offline").classList.add("versteckt"));
+  fensterHoeren("online", () => { $("#kopf-offline").classList.add("versteckt"); aktualisieren(false); });
   fensterHoeren("offline", () => $("#kopf-offline").classList.remove("versteckt"));
+  // Zurück in der App (Home-Bildschirm-App, anderer Tab): still nachsehen, ob am Mac veröffentlicht wurde.
+  // Das Ereignis gehört zum Dokument (Safari wie Chrome); aufraeumen() entfernt es vor der Übergabe.
+  fensterHoeren("visibilitychange", () => { if(document.visibilityState === "visible" && Date.now() - aktualisiertUm > 60000) aktualisieren(false); }, undefined, document);
   $("#login-name").value = lsLesen(NAME_KEY, "Tom");
   $("#login-merken").checked = STANDALONE;
   $("#login-tipp").classList.toggle("versteckt", !(IOS && !STANDALONE));
@@ -875,11 +977,14 @@ async function start(){
     loginStatus("Lade gespeicherte Sitzung …");
     try{
       SESSION = gespeichert.s; MERKEN = gespeichert.merken;
+      const a = await indexAbgleichen();              // frischer Build-Stand; wirft, wenn der Tresor fehlt
+      if(a.stand === "neu") SESSION.vaults[0].manifest = a.manifest;
       M = await ladeManifest(SESSION);
+      if(a.stand === "neu" && (!M.build || M.build === a.build)){ SESSION.build = a.build; sitzungSpeichern(SESSION, MERKEN); }
+      aktualisiertUm = Date.now();
       appZeigen();
       tresorAnSW();
-      if(GEWUENSCHT){ const g = GEWUENSCHT; GEWUENSCHT = null; oeffnen(g.id, g.hash, g.rel); return; }
-      pruefeAktualisierung();
+      if(GEWUENSCHT){ const g = GEWUENSCHT; GEWUENSCHT = null; oeffnen(g.id, g.hash, g.rel); }
       return;
     }catch(e){
       SESSION = null;

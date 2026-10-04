@@ -35,6 +35,15 @@ Origin `temmchen.github.io` und bleibt je Gerät erhalten. Überall eingefügt: 
 Neue Module, Präsentationen und Simulationen erscheinen von selbst, sobald ihr Ordner in OneDrive liegt und
 einmal veröffentlicht wurde; die Repo-Liste wird bei jeder Veröffentlichung neu geholt.
 
+**Aktualisieren (↻ oben rechts):** holt `vaults/index.json` und das Manifest frisch – mit Zusatz `?t=…`, also am
+Zwischenspeicher von GitHub Pages (bis zu 10 Minuten) vorbei –, zeichnet bei neuem Build alle Listen neu und
+meldet „Schon aktuell · Stand …“ oder „Aktualisiert · Stand … · n neue Einträge“. Dasselbe passiert still, wenn
+die App wieder in den Vordergrund kommt (frühestens eine Minute nach der letzten Prüfung) oder das Netz
+zurückkehrt; beim Start mit gespeicherter Sitzung wird der Build ohnehin abgeglichen. Wurde der Tresor neu
+verschlüsselt (neues Passwort, `--neu-verschluesseln`), führt ↻ zur Anmeldung. ↻ prüft außerdem, ob es eine neue
+Fassung der App selbst (index.html, sw.js) gibt, und lädt die Seite dann einmal neu – eine Web-App auf dem
+Home-Bildschirm bleibt sonst tagelang bei der alten Fassung.
+
 ## Alltag
 
 ```bash
@@ -72,9 +81,12 @@ dashboard/
 ├── zugangsdaten.beispiel.json  Vorlage ohne echtes Passwort
 ├── werkzeuge/
 │   ├── pruefen.py              Prüflauf in headless Chrome (iPhone, iPhone quer, iPad, Mac) mit Prüfbildern
+│   ├── pruefung_refresh.py     Knopf ↻ mit simulierter Veröffentlichung (Temp-Kopie von docs/, Manifest neu verschlüsselt)
+│   ├── pruefung_safari.py      dasselbe in WebKit: Safari über safaridriver oder --wkwebview (WKWebView, ohne Safari-Freigabe)
+│   ├── webkit_treiber.swift    WKWebView als Prüf-Browser für pruefung_safari.py --wkwebview (swiftc)
 │   └── symbole.py              zeichnet die App-Symbole (PNG) neu
 └── docs/                       GitHub-Pages-Wurzel
-    ├── index.html              Web-App: Anmeldung, Startseite (Rechner, Kacheln), vier Bereiche mit Suche/Filtern, Entschlüsseln, Übergabe
+    ├── index.html              Web-App: Anmeldung, Startseite (Rechner, Kacheln), vier Bereiche mit Suche/Filtern, Aktualisieren ↻, Entschlüsseln, Übergabe
     ├── sw.js                   Service Worker: App-Hülle + Tresordateien offline, d/<Kennung>/… entschlüsselt ausliefern
     ├── manifest.webmanifest, icons/
     └── vaults/                 index.json (Salts, eingewickelte Schlüssel) + <id>/m.enc + <id>/f/<id>.enc
@@ -89,9 +101,17 @@ mit „angemeldet bleiben“ merkt er ihn in IndexedDB (sonst nur im Speicher �
 leitet `d/…` zur Anmeldung um und danach wieder zurück).
 
 Prüfen: `/usr/bin/python3 werkzeuge/pruefen.py [--geraet iphone|ipad|mac|alle] [--url …]` (Anmeldung
-falsch/richtig, Startseite mit Rechnern und Kacheln, GitHub mit Suche/Filter/QR, Präsentation mit Touch-Leiste,
-Lerndashboard mit Suche und Verknüpfung `?d=…#/2/1`, Simulationen mit Klassen-Filter und mehrteiliger Simulation über
-den Service Worker, Rückwege, Abmelden; Prüfbilder in `Pruefbilder/`).
+falsch/richtig, Startseite mit Rechnern und Kacheln, Knopf ↻ „Schon aktuell“, GitHub mit Suche/Filter/QR, Präsentation
+mit Touch-Leiste, Lerndashboard mit Suche und Verknüpfung `?d=…#/2/1`, Simulationen mit Klassen-Filter und mehrteiliger
+Simulation über den Service Worker, Rückwege, Abmelden; Prüfbilder in `Pruefbilder/`). Ohne `zugangsdaten.json`
+(Arbeitskopie) kommt das Passwort aus der Umgebungsvariable `DM_PASSWORT`.
+`/usr/bin/python3 werkzeuge/pruefung_refresh.py [--schnell]` spielt den Knopf ↻ mit einer simulierten Veröffentlichung
+durch (Temp-Kopie von docs/: Manifest entschlüsseln, Einträge anhängen, neu verschlüsseln, neuer Build → „Aktualisiert … 2
+neue Einträge“, stille Aktualisierung über „online“ und – nach 61 s Wartezeit, ohne `--schnell` – „visibilitychange“,
+Neustart mit gespeicherter Sitzung, Tresor neu verschlüsselt → Anmeldung).
+Dasselbe in **WebKit**, der Engine von Safari auf iPhone und iPad: `werkzeuge/pruefung_safari.py --wkwebview` (WKWebView
+über `webkit_treiber.swift`, braucht keine Freigabe; zeigt kurz ein Fenster) oder ohne `--wkwebview` in Safari selbst
+(einmalig Safari → Entwickler → „Entfernte Automation erlauben“).
 
 Lokal ansehen: `cd docs && /usr/bin/python3 -m http.server 8427 --bind 127.0.0.1` → http://127.0.0.1:8427/
 (Direktes Öffnen der Datei per Doppelklick funktioniert nicht — `fetch()` und der Service Worker brauchen

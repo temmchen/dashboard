@@ -13,7 +13,8 @@ Abmelden. Schreibt Prüfbilder und meldet JavaScript-Fehler.
 
     /usr/bin/python3 werkzeuge/pruefen.py [--geraet iphone|iphone-quer|ipad|mac|alle] [--bilder ORDNER] [--url ADRESSE]
 
-Das Passwort liest das Werkzeug aus zugangsdaten.json (nur lokal vorhanden).
+Das Passwort liest das Werkzeug aus zugangsdaten.json (nur lokal vorhanden) — oder, wenn eine
+Arbeitskopie ohne Zugangsdaten geprüft wird, aus der Umgebungsvariable DM_PASSWORT (Zugangsname DM_ZUGANG).
 Nach dem Lauf wird der Webserver beendet; es bleibt nichts laufen.
 """
 import argparse
@@ -193,8 +194,15 @@ def main():
     a = ap.parse_args()
     bilder = pathlib.Path(a.bilder)
     bilder.mkdir(parents=True, exist_ok=True)
-    cfg = json.loads((HIER / 'zugangsdaten.json').read_text(encoding='utf-8'))
-    passwort = cfg['zugaenge'][0]['passwort']
+    passwort = os.environ.get('DM_PASSWORT') or ''
+    zugang = os.environ.get('DM_ZUGANG') or 'Tom'
+    konfig = HIER / 'zugangsdaten.json'
+    if konfig.is_file():
+        cfg = json.loads(konfig.read_text(encoding='utf-8'))
+        passwort = passwort or cfg['zugaenge'][0]['passwort']
+        zugang = cfg['zugaenge'][0]['name']
+    if not passwort:
+        sys.exit('Passwort fehlt: zugangsdaten.json neben werkzeuge/ oder Umgebungsvariable DM_PASSWORT setzen.')
     geraete = list(GERAETE) if a.geraet == 'alle' else [a.geraet]
 
     if a.url:
@@ -265,7 +273,7 @@ def main():
                 cdp.warte_bis(APP_SICHTBAR, frist=25)
                 cdp.pumpe(0.8)
                 wer = cdp.js("document.getElementById('fuss-wer').textContent")
-                melde('Anmeldung (Passwort in GROSSBUCHSTABEN) → App', wer == cfg['zugaenge'][0]['name'], 'Zugang ' + wer)
+                melde('Anmeldung (Passwort in GROSSBUCHSTABEN) → App', wer == zugang, 'Zugang ' + wer)
                 melde('Sitzung gemerkt (localStorage)', bool(cdp.js("!!localStorage.getItem('dm_sitzung')")))
                 n_k = cdp.js("document.querySelectorAll('#kacheln .kachel').length")
                 n_r = cdp.js("document.querySelectorAll('#rechner .r-kachel').length")
@@ -277,6 +285,15 @@ def main():
                 melde('QR-Code eines Rechners', bool(cdp.js("!document.getElementById('qr').classList.contains('versteckt') && !!document.querySelector('#qr svg path')")), cdp.js("document.querySelector('#qr .qr-url').textContent"))
                 cdp.js("document.getElementById('qr').click()", warten=False)
                 cdp.pumpe(0.2)
+
+                # 3b) Knopf ↻ (Aktualisieren) ohne neue Veröffentlichung → „Schon aktuell“, Stand bleibt
+                stand_vorher = cdp.js("document.getElementById('kopf-stand').textContent")
+                cdp.js("document.getElementById('knopf-aktualisieren').click()", warten=False)
+                hinweis = cdp.warte_bis("(function(){var t=document.getElementById('toast'); return t.classList.contains('zeig') ? t.textContent : ''})()", frist=15)
+                melde('Knopf ↻ meldet „Schon aktuell“', 'Schon aktuell' in hinweis and cdp.js("document.getElementById('kopf-stand').textContent") == stand_vorher, hinweis)
+                cdp.bild(bilder / f'{g}-01c-aktualisieren.png')
+                cdp.warte_bis("!document.getElementById('knopf-aktualisieren').disabled", frist=10)
+                js_fehler('Aktualisieren')
 
                 # 4) Reiter Repos
                 melde('Kachel GitHub öffnet den Bereich', bool(bereich('repos')))

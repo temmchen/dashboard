@@ -7,8 +7,8 @@ zugangsdaten.json
 # GEHEIM — Tresor-Schlüssel des inkrementellen Builds
 .build-state.json
 
-# Prüfbilder des Testwerkzeugs
-Pruefbilder/
+# Prüfbilder der Testwerkzeuge (Pruefbilder/, Pruefbilder-refresh/, Pruefbilder-webkit/ …)
+Pruefbilder*/
 
 # macOS
 .DS_Store
