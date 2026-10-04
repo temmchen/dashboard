@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-veroeffentlichen.py — Ein-Klick-Veröffentlichung für die Lerndashboards
-========================================================================
+veroeffentlichen.py — Ein-Klick-Veröffentlichung für Dashboard Mobil
+=====================================================================
 
-Gedacht für den Doppelklick auf „Lerndashboards veröffentlichen.command" im
-OneDrive-Ordner KI/Lerndashboards Mobil — und für den Portal-Wächter, der
+Gedacht für den Doppelklick auf „Dashboard Mobil veröffentlichen.command" im
+OneDrive-Ordner KI/Dashboard Mobil — und für den Portal-Wächter, der
 `--pruefen` aufrufen und bei „OFFEN" selbst veröffentlichen kann.
 
   1. holt den GitHub-Stand ab (git pull)
-  2. vergleicht die Lerndashboards (HTML-Datei, README.md und github.json je
-     Modulordner) mit dem Stand der letzten Veröffentlichung
+  2. vergleicht die Inhalte (Lerndashboards, Präsentationen, Simulationen samt
+     README.md/github.json/zuordnung.json) und die Repo-Liste bei GitHub mit dem
+     Stand der letzten Veröffentlichung
   3. baut verschlüsselt neu, prüft docs/ auf private Klartexte, committet, pusht —
      nur wenn sich etwas geändert hat
 
@@ -22,13 +23,15 @@ OneDrive-Ordner KI/Lerndashboards Mobil — und für den Portal-Wächter, der
 """
 
 import json
-import re
 import subprocess
 import sys
 import unicodedata
 from pathlib import Path
 
 HIER = Path(__file__).resolve().parent
+sys.path.insert(0, str(HIER))
+import build as B  # noqa: E402  (gleicher Ordner: Quellen einsammeln, Repo-Signatur)
+
 DOCS = HIER / "docs"
 KONFIG = HIER / "zugangsdaten.json"
 STAND = HIER / ".letzter-stand.json"          # lokales Gedächtnis (gitignored)
@@ -53,28 +56,34 @@ def stat_von(p: Path):
     return [st.st_size, int(st.st_mtime)]
 
 
-def inventar(cfg):
-    """Alles, was in den Build eingeht: {relativer Pfad: [Größe, mtime]}."""
-    quelle = Path(cfg["quelle"]).expanduser()
+def inventar(cfg, mit_repos=True):
+    """Alles, was in den Build eingeht: {Schlüssel: [Größe, mtime]} + Repo-Signatur unter "@repos"
+    (None, wenn GitHub gerade nicht erreichbar war)."""
+    manifest, jobs, _ = B.sammle(cfg)
     inv = {}
-    if not quelle.is_dir():
-        return inv
-    for ordner in sorted(p for p in quelle.iterdir() if p.is_dir()):
-        if ordner.name.startswith((".", "_")):
+    for schluessel, p, _e, _rel in jobs:
+        inv[schluessel] = stat_von(p)
+    for bereich, quelle in B.quellen(cfg).items():
+        if not quelle.is_dir():
             continue
-        for p in sorted(ordner.glob("*.html")):
-            if p.is_file() and not p.name.startswith("."):
-                inv[f"{ordner.name}/{p.name}"] = stat_von(p)
-        for name in BEGLEITER:
-            p = ordner / name
-            if p.is_file():
-                inv[f"{ordner.name}/{name}"] = stat_von(p)
-    return inv
+        if bereich == "simulationen":
+            kandidaten = [p for p in quelle.rglob("*") if p.is_dir()]
+        else:
+            kandidaten = [p for p in quelle.iterdir() if p.is_dir()]
+        for ordner in kandidaten:
+            if any(t.startswith(".") or t.lower() in B.IGNORIERTE_ORDNER for t in ordner.relative_to(quelle).parts):
+                continue
+            for name in BEGLEITER:
+                p = ordner / name
+                if p.is_file():
+                    inv[f"{bereich}/{ordner.relative_to(quelle).as_posix()}/{name}"] = stat_von(p)
+    inv["@repos"] = B.repos_signatur() if mit_repos else None
+    return inv, manifest
 
 
 # ─────────────────────────── Klartext-Prüfung ───────────────────────────────
 
-def verbotene_texte(cfg):
+def verbotene_texte(cfg, manifest):
     """Private Texte, die nie im Klartext in docs/ stehen dürfen."""
     texte = []
     for z in cfg.get("zugaenge") or []:
@@ -82,24 +91,16 @@ def verbotene_texte(cfg):
         if len(pw) >= 8:
             texte.append((pw.lower(), f"Passwort von Zugang „{z.get('name', '?')}“"))
             texte.append((pw.lower().replace("-", ""), f"Passwort von Zugang „{z.get('name', '?')}“ (ohne Bindestriche)"))
-    # Kennzeichen eines Dashboards im Klartext: der eingebettete Planungsblock und die Titel.
-    texte.append(('id="meta"', "Planungsblock eines Dashboards"))
-    quelle = Path(cfg["quelle"]).expanduser()
-    if quelle.is_dir():
-        for ordner in quelle.iterdir():
-            if not ordner.is_dir() or ordner.name.startswith((".", "_")):
-                continue
-            for p in ordner.glob("*.html"):
-                try:
-                    m = re.search(r"<title>(.*?)</title>", p.read_text(encoding="utf-8", errors="replace"), re.S | re.I)
-                except Exception:
-                    m = None
-                if m and len(m.group(1).strip()) >= 8:
-                    texte.append((m.group(1).strip().lower(), f"Titel von {ordner.name}/{p.name}"))
+    texte.append(('id="meta"', "Planungsblock eines Lerndashboards"))
+    for b in B.BEREICHE:
+        for e in (manifest.get("bereiche") or {}).get(b, []):
+            t = str(e.get("titel") or "").strip()
+            if e.get("typ") == "tresor" and len(t) >= 8:
+                texte.append((t.lower(), f"Titel von {b}/{e.get('id')}"))
     return texte
 
 
-def pruefe_klartext(cfg):
+def pruefe_klartext(cfg, manifest):
     """docs/ nach privaten Klartexten durchsuchen; geheime Dateien dürfen nicht im Git-Index sein."""
     treffer = []
     for geheim in GEHEIM:
@@ -108,15 +109,12 @@ def pruefe_klartext(cfg):
     for zeile in git("ls-files", "-s", fehler_ok=True).stdout.splitlines():
         if zeile.startswith("120000"):
             treffer.append((zeile.split("\t", 1)[-1], "Verknüpfung (Symlink) im Git-Index"))
-    texte = verbotene_texte(cfg)
+    texte = verbotene_texte(cfg, manifest)
     for p in sorted(DOCS.rglob("*")):
-        if not p.is_file():
+        if not p.is_file() or p.suffix == ".enc":            # Chiffrat: zufällige Bytes, kein Text
             continue
         rel = p.relative_to(HIER).as_posix()
-        if p.suffix == ".enc":
-            continue                                   # Chiffrat: zufällige Bytes, kein Text
-        roh = p.read_bytes()
-        klein = roh.lower()
+        klein = p.read_bytes().lower()
         for text, art in texte:
             if text.encode("utf-8") in klein:
                 treffer.append((rel, art))
@@ -129,13 +127,11 @@ def main():
     if not KONFIG.is_file():
         sys.exit("zugangsdaten.json fehlt im Repo-Ordner (Verknüpfung nach _Portal-Setup/geheim).")
     cfg = json.loads(KONFIG.read_text(encoding="utf-8"))
-    url = cfg.get("url") or "https://temmchen.github.io/lerndashboards/"
-    quelle = Path(cfg["quelle"]).expanduser()
-    if not quelle.is_dir():
-        sys.exit(f"Quellordner nicht gefunden: {quelle}")
+    url = cfg.get("url") or "https://temmchen.github.io/dashboard/"
 
     if "--nur-pruefung" in sys.argv:
-        treffer = pruefe_klartext(cfg)
+        manifest, _, _ = B.sammle(cfg)
+        treffer = pruefe_klartext(cfg, manifest)
         if treffer:
             sag("❌ Private Angaben im Klartext gefunden:")
             for datei, art in treffer:
@@ -150,25 +146,28 @@ def main():
             stand_alt = json.loads(STAND.read_text(encoding="utf-8"))
         except Exception:
             stand_alt = {}
+    alt = stand_alt.get("inventar", {})
 
     # --pruefen: nur nachsehen, nichts anfassen (Portal-Wächter)
     if "--pruefen" in sys.argv:
-        jetzt = inventar(cfg)
+        jetzt, _ = inventar(cfg)
+        if jetzt.get("@repos") is None:
+            jetzt["@repos"] = alt.get("@repos")      # GitHub nicht erreichbar → zählt nicht als Änderung
         git("fetch", "--quiet", "origin", "main", fehler_ok=True)
         voraus = git("rev-list", "--count", "HEAD..origin/main", fehler_ok=True).stdout.strip() or "0"
-        if jetzt == stand_alt.get("inventar", {}) and voraus == "0":
+        if jetzt == alt and voraus == "0":
             print("NICHTS-ZU-TUN")
         else:
             print("OFFEN")
         return
 
-    sag("📱 Lerndashboards — Prüfen & Veröffentlichen")
+    sag("📱 Dashboard Mobil — Prüfen & Veröffentlichen")
     sag("=" * 46)
 
     # 1) GitHub-Stand holen
     hat_remote = bool(git("remote", fehler_ok=True).stdout.strip())
     if not hat_remote:
-        sys.exit("❌ Kein GitHub-Remote eingerichtet — bitte „Lerndashboards einrichten.command“ ausführen.")
+        sys.exit("❌ Kein GitHub-Remote eingerichtet — bitte „Dashboard Mobil einrichten.command“ ausführen.")
     sag("\n① Hole aktuellen Stand von GitHub …")
     pull = git("pull", "--no-rebase", "--quiet", "origin", "main", fehler_ok=True)
     if pull.returncode != 0:
@@ -176,11 +175,15 @@ def main():
         sys.exit(1)
 
     # 2) Änderungen seit der letzten Veröffentlichung
-    jetzt = inventar(cfg)
-    alt = stand_alt.get("inventar", {})
-    neu = sorted(set(jetzt) - set(alt))
-    weg = sorted(set(alt) - set(jetzt))
-    geaendert = sorted(k for k in set(jetzt) & set(alt) if jetzt[k] != alt[k])
+    jetzt, manifest = inventar(cfg)
+    repos_neu = jetzt.get("@repos")
+    if repos_neu is None:
+        jetzt["@repos"] = alt.get("@repos")
+        sag("   ⚠️  GitHub-Repo-Liste nicht abrufbar — die letzte Liste bleibt.")
+    neu = sorted(k for k in set(jetzt) - set(alt) if not k.startswith("@"))
+    weg = sorted(k for k in set(alt) - set(jetzt) if not k.startswith("@"))
+    geaendert = sorted(k for k in set(jetzt) & set(alt) if jetzt[k] != alt[k] and not k.startswith("@"))
+    repos_anders = jetzt.get("@repos") != alt.get("@repos")
     sag("\n② Änderungen seit der letzten Veröffentlichung:" if stand_alt
         else "\n② Erste Veröffentlichung mit diesem Werkzeug — nehme alles auf:")
     for k in neu[:15]:
@@ -193,26 +196,28 @@ def main():
         sag(f"   ~ … und {len(geaendert) - 10} weitere")
     for k in weg[:10]:
         sag(f"   − {k}")
-    if not (neu or geaendert or weg):
+    if repos_anders:
+        sag("   ~ GitHub-Repos (neu, umbenannt oder gepusht)")
+    if not (neu or geaendert or weg or repos_anders):
         sag("   (keine Änderungen)")
 
     erzwingen = "--erzwingen" in sys.argv
     if erzwingen:
         sag("   (--erzwingen: baue und veröffentliche auch ohne Änderung)")
-    if not (neu or geaendert or weg or erzwingen):
+    if not (neu or geaendert or weg or repos_anders or erzwingen):
         sag("\n✅ Alles aktuell — iPhone und iPad haben schon den neuesten Stand.")
         STAND.write_text(json.dumps({"inventar": jetzt}), encoding="utf-8")
         return
 
-    # 3) Bauen
+    # 3) Bauen (die Repo-Liste wurde gerade eben abgefragt; ohne Zugriff bleibt die alte)
     sag("\n③ Baue verschlüsselt neu …")
-    r = subprocess.run([sys.executable, str(HIER / "build.py")])
+    r = subprocess.run([sys.executable, str(HIER / "build.py")] + (["--ohne-repos"] if repos_neu is None else []))
     if r.returncode != 0:
         sys.exit("❌ build.py fehlgeschlagen — es wurde nichts veröffentlicht.")
 
     # 4) Klartext-Prüfung
     sag("\n④ Prüfe docs/ auf private Klartexte …")
-    treffer = pruefe_klartext(cfg)
+    treffer = pruefe_klartext(cfg, manifest)
     if treffer:
         sag("❌ Private Angaben im Klartext gefunden – es wird NICHTS veröffentlicht:")
         for datei, art in treffer:
@@ -229,6 +234,8 @@ def main():
         teile.append(f"{len(geaendert)} geändert")
     if weg:
         teile.append(f"{len(weg)} entfernt")
+    if repos_anders:
+        teile.append("Repo-Liste")
     nachricht = "Inhalte aktualisiert: " + (", ".join(teile) if teile else "neu gebaut")
 
     sag("⑤ Veröffentliche …")
@@ -247,7 +254,7 @@ def main():
 
     STAND.write_text(json.dumps({"inventar": jetzt}), encoding="utf-8")
     sag(f"\n✅ Fertig! In 1–2 Minuten online: {url}")
-    sag("   Auf iPhone/iPad: Lerndashboards öffnen — die Seite lädt den neuen Stand von selbst.")
+    sag("   Auf iPhone/iPad: Dashboard öffnen — die Seite lädt den neuen Stand von selbst.")
 
 
 if __name__ == "__main__":

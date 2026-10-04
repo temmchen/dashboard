@@ -1,13 +1,27 @@
 {
-  "portal": "Lerndashboards",
-  "url": "https://temmchen.github.io/lerndashboards/",
-  "repo": "https://github.com/temmchen/lerndashboards.git",
+  "portal": "Dashboard Mobil",
+  "url": "https://temmchen.github.io/dashboard/",
+  "repo": "https://github.com/temmchen/dashboard.git",
   "schuljahr": "2026 – 2027",
-  "quelle": "/Users/tbr/Library/CloudStorage/OneDrive-365education/KI/Lerndashboards",
-  "werkzeuge": "/Users/tbr/Library/CloudStorage/OneDrive-365education/KI/Lerndashboards Mobil",
+  "quellen": {
+    "lerndashboards": "/Users/tbr/Library/CloudStorage/OneDrive-365education/KI/Lerndashboards",
+    "praesentationen": "/Users/tbr/Library/CloudStorage/OneDrive-365education/KI/Keynotes",
+    "simulationen": "/Users/tbr/Library/CloudStorage/OneDrive-365education/KI/Simulations"
+  },
+  "werkzeuge": "/Users/tbr/Library/CloudStorage/OneDrive-365education/KI/Dashboard Mobil",
   "optionen": {
     "max_mb_je_datei": 40,
     "ausschliessen": []
+  },
+  "repos": {
+    "benutzer": "temmchen",
+    "portale": ["journal-mobil", "schuljahr-portal", "CdM", "kilometerrechner", "pfa", "dashboard", "repo-uebersicht"],
+    "keine_simulation": ["repo-uebersicht", "trafic_info"],
+    "schueler_apps": [
+      { "titel": "fx-991DE X Trainer", "adresse": "https://temmchen.github.io/fx991/" },
+      { "titel": "RPN42 · Tom Bleyer", "adresse": "https://temmchen.github.io/rpn42/" },
+      { "titel": "Potentialdiagramm", "adresse": "https://temmchen.github.io/diagramme-potentiel/" }
+    ]
   },
   "zugaenge": [
     { "name": "Tom", "passwort": "HIER-PASSWORT-4-GRUPPEN" }

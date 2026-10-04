@@ -1,7 +1,7 @@
 {
-  "name": "Lerndashboards",
-  "short_name": "Lerndashboards",
-  "description": "Lerndashboards von Tom Bleyer (LTEtt) – verschlüsselt, für iPhone und iPad.",
+  "name": "Dashboard Mobil",
+  "short_name": "Dashboard",
+  "description": "Repos, Präsentationen, Lerndashboards und Simulationen von Tom Bleyer (LTEtt) – verschlüsselt, für iPhone und iPad.",
   "lang": "de",
   "start_url": "./",
   "scope": "./",

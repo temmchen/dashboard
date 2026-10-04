@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-verwaltung.py — Lerndashboards · Zugänge verwalten
-===================================================
+verwaltung.py — Dashboard Mobil · Zugänge verwalten
+====================================================
 
 Verwaltet die Zugänge in zugangsdaten.json (liegt als Verknüpfung in OneDrive,
-_Portal-Setup/geheim/Lerndashboards-zugangsdaten.json) und schreibt die lesbare
-Passwort-Übersicht samt QR-Code in den OneDrive-Ordner „KI/Lerndashboards Mobil“
+_Portal-Setup/geheim/DashboardMobil-zugangsdaten.json) und schreibt die lesbare
+Passwort-Übersicht samt QR-Code in den OneDrive-Ordner „KI/Dashboard Mobil“
 (Feld `werkzeuge` der zugangsdaten.json) sowie eine Kopie nach „KI/Passwoerter“.
 
     /usr/bin/python3 verwaltung.py liste              alle Zugänge anzeigen
@@ -77,23 +77,23 @@ def werkzeugordner(cfg) -> Path:
 
 
 def schreibe_passwort_readme(cfg):
-    """Lesbare Passwort-Übersicht in den OneDrive-Ordner „KI/Lerndashboards Mobil“ und
+    """Lesbare Passwort-Übersicht in den OneDrive-Ordner „KI/Dashboard Mobil“ und
     nach „KI/Passwoerter“ schreiben — beides außerhalb des Repos, nie hochgeladen."""
-    url = cfg.get("url") or "https://temmchen.github.io/lerndashboards/"
+    url = cfg.get("url") or "https://temmchen.github.io/dashboard/"
     ordner = werkzeugordner(cfg)
     if not ordner.is_dir():
         print(f"ℹ️  Werkzeugordner fehlt ({ordner}) — keine Passwort-Übersicht geschrieben.")
         return
-    qr = ordner / "QR-Lerndashboards.png"
+    qr = ordner / "QR-Dashboard-Mobil.png"
     hat_qr = qr_erzeugen(url, qr)
     stand = date.today().strftime("%d.%m.%Y")
 
     z = []
-    z.append("# 🔐 Lerndashboards (iPhone & iPad) — Zugang und Passwort")
+    z.append("# 🔐 Dashboard Mobil (iPhone & iPad) — Zugang und Passwort")
     z.append("")
     z.append("> ⚠️ **NUR für dich (OneDrive, privat).** Niemals ins Repo kopieren, niemals teilen.")
     z.append("> Diese Datei schreibt `verwaltung.py` **automatisch** — nicht von Hand pflegen.")
-    z.append("> Quelle der Wahrheit: `_Portal-Setup/geheim/Lerndashboards-zugangsdaten.json`.")
+    z.append("> Quelle der Wahrheit: `_Portal-Setup/geheim/DashboardMobil-zugangsdaten.json`.")
     z.append("")
     z.append(f"**Adresse:** {url}  ")
     z.append(f"**Schuljahr:** {cfg.get('schuljahr', '?')} · **Stand:** {stand}")
@@ -101,7 +101,7 @@ def schreibe_passwort_readme(cfg):
     if hat_qr:
         z.append("**Am iPhone/iPad öffnen:** Kamera auf den Code halten, dann in Safari „Teilen → Zum Home-Bildschirm“.")
         z.append("")
-        z.append("![QR-Code Lerndashboards](QR-Lerndashboards.png)")
+        z.append("![QR-Code Dashboard Mobil](QR-Dashboard-Mobil.png)")
         z.append("")
     z.append("| Zugang | Passwort |")
     z.append("|---|---|")
@@ -115,22 +115,23 @@ def schreibe_passwort_readme(cfg):
     z.append("")
     z.append("## Gut zu wissen")
     z.append("")
-    z.append("- Passwort ändern: `/usr/bin/python3 ~/Documents/GitHub/lerndashboards/verwaltung.py passwort \"Tom\"`")
+    z.append("- Passwort ändern: `/usr/bin/python3 ~/Documents/GitHub/dashboard/verwaltung.py passwort \"Tom\"`")
     z.append("  (oder `… setzen \"Tom\" \"wunsch-passwort\"`) → der Tresor wird neu verschlüsselt, alte Anmeldungen")
-    z.append("  auf den Geräten verfallen. Danach `Lerndashboards veröffentlichen.command` doppelklicken.")
+    z.append("  auf den Geräten verfallen. Danach `Dashboard Mobil veröffentlichen.command` doppelklicken.")
     z.append("- Weiterer Zugang (z. B. iPad mit eigenem Passwort): `… verwaltung.py zugang \"iPad\"`")
-    z.append("- Inhalte: alle Lerndashboards aus `KI/Lerndashboards/` (je Modul die HTML-Datei oben im Ordner);")
-    z.append("  Ordner mit `github.json` erscheinen nur als Link auf die öffentliche GitHub-Pages-Seite.")
-    z.append("- Das Repo `temmchen/lerndashboards` ist öffentlich, enthält aber nur Programmcode und AES-256-Chiffrat.")
+    z.append("- Inhalte: alle eigenen GitHub-Repos (auch private, nur als Liste mit Links und QR-Codes), die")
+    z.append("  Präsentationen aus `KI/Keynotes/`, die Lerndashboards aus `KI/Lerndashboards/` und die")
+    z.append("  Simulationen aus `KI/Simulations/`. Ordner mit `github.json` erscheinen nur als Link.")
+    z.append("- Das Repo `temmchen/dashboard` ist öffentlich, enthält aber nur Programmcode und AES-256-Chiffrat.")
     text = "\n".join(z) + "\n"
     (ordner / "PASSWOERTER.md").write_text(text, encoding="utf-8")
 
     # Zweite Kopie neben den anderen Portal-Zugangsdaten (KI/Passwoerter/), ohne Bild-Link.
     passwoerter = ordner.parent / "Passwoerter"
     if passwoerter.is_dir():
-        kopie = text.replace("![QR-Code Lerndashboards](QR-Lerndashboards.png)",
-                             "QR-Code: `KI/Lerndashboards Mobil/QR-Lerndashboards.png`")
-        (passwoerter / "Lerndashboards README.md").write_text(kopie, encoding="utf-8")
+        kopie = text.replace("![QR-Code Dashboard Mobil](QR-Dashboard-Mobil.png)",
+                             "QR-Code: `KI/Dashboard Mobil/QR-Dashboard-Mobil.png`")
+        (passwoerter / "Dashboard Mobil README.md").write_text(kopie, encoding="utf-8")
 
 
 # ─────────────────────────── Befehle ────────────────────────────────────────
@@ -147,12 +148,14 @@ def abschluss(*zeilen):
     for z in zeilen:
         print(z)
     print("\nJetzt veröffentlichen:  /usr/bin/python3 veroeffentlichen.py --erzwingen")
-    print("(oder Doppelklick auf „Lerndashboards veröffentlichen.command“ — mit --erzwingen)")
+    print("(oder Doppelklick auf „Dashboard Mobil veröffentlichen.command“ — mit --erzwingen)")
 
 
 def cmd_liste(cfg):
-    print(f"Lerndashboards · {cfg.get('schuljahr', '?')} · {cfg.get('url', '')}")
-    print(f"Inhalte aus: {cfg.get('quelle', '?')}\n")
+    print(f"Dashboard Mobil · {cfg.get('schuljahr', '?')} · {cfg.get('url', '')}")
+    for b, p in (cfg.get("quellen") or {}).items():
+        print(f"  Quelle {b}: {p}")
+    print()
     for zg in cfg.get("zugaenge", []):
         print(f"  {zg.get('name', '?'):22s} Passwort: {zg.get('passwort', '?')}")
 
@@ -213,7 +216,7 @@ def cmd_entfernen(cfg, name):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Lerndashboards verwalten")
+    parser = argparse.ArgumentParser(description="Dashboard Mobil verwalten")
     sub = parser.add_subparsers(dest="befehl", required=True)
     sub.add_parser("liste", help="alle Zugänge anzeigen")
     sub.add_parser("readme", help="Passwort-Übersicht und QR-Code neu schreiben")

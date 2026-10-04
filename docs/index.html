@@ -9,20 +9,20 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Lerndashboards">
+<meta name="apple-mobile-web-app-title" content="Dashboard">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
-<title>Lerndashboards · Tom Bleyer</title>
+<title>Dashboard · Tom Bleyer</title>
 <style>
 /* ═══════════════════════ Farben & Grundlagen ═══════════════════════
-   Dunkel wie die Lerndashboards selbst (Hintergrund #070a12, Akzent Cyan). */
+   Dunkel wie die Lerndashboards (Hintergrund #070a12, Akzent Cyan). */
 :root{
   --bg:#070a12; --card:#0c111d; --card2:#121a2b; --line:#1f2738; --line2:#2a3449;
   --tx:#e8edf5; --tx2:#aab4c6; --tx3:#6b7690; --acc:#16c5e8; --acc-tx:#04202a;
-  --rot:#f87171; --gruen:#4ade80; --gelb:#fbbf24;
-  --radius:16px;
+  --rot:#f87171; --gruen:#4ade80; --gelb:#fbbf24; --lila:#a78bfa; --pink:#ec4899; --tuerkis:#14b8a6;
+  --radius:16px; --tab-h:64px;
   color-scheme:dark;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
@@ -32,6 +32,8 @@ body{min-height:100vh;min-height:100dvh}
 button,input{font:inherit}
 .versteckt{display:none!important}
 a{color:var(--acc)}
+h2{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin:22px 0 8px;font-weight:700}
+h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin:26px 0 8px;font-weight:700}
 
 /* ═══════════════════════ Anmeldung ═══════════════════════ */
 #anmeldung{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;
@@ -57,16 +59,19 @@ a{color:var(--acc)}
 .tipp b{color:var(--tx)}
 
 /* ═══════════════════════ App ═══════════════════════ */
-#app{max-width:880px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) calc(env(safe-area-inset-right) + 16px)
-  calc(env(safe-area-inset-bottom) + 40px) calc(env(safe-area-inset-left) + 16px)}
-#kopf{display:flex;align-items:center;gap:12px;padding:6px 0 16px}
+#app{max-width:900px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) calc(env(safe-area-inset-right) + 16px)
+  calc(var(--tab-h) + env(safe-area-inset-bottom) + 24px) calc(env(safe-area-inset-left) + 16px)}
+#kopf{display:flex;align-items:center;gap:12px;padding:6px 0 10px}
 #kopf img{width:42px;height:42px;border-radius:11px;flex:none}
 #kopf h1{margin:0;font-size:20px;line-height:1.2}
 #kopf .sub{color:var(--tx2);font-size:13px;display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
 #kopf .rechts{margin-left:auto;flex:none}
 .rund{height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:transparent;color:var(--tx2);cursor:pointer;font-size:14px}
 .marke{padding:2px 8px;border-radius:999px;background:#3a1f1f;color:#f8b4b4;font-size:12px}
-.karten{display:grid;grid-template-columns:1fr;gap:12px}
+.tab-kopf{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:8px 0 4px}
+.tab-kopf h2{margin:0;font-size:18px;letter-spacing:0;text-transform:none;color:var(--tx)}
+.tab-info{color:var(--tx3);font-size:13px}
+.karten{display:grid;grid-template-columns:1fr;gap:12px;margin-top:10px}
 @media (min-width:760px){.karten{grid-template-columns:1fr 1fr}}
 .karte{position:relative;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:var(--radius);
   padding:16px 18px;display:flex;flex-direction:column}
@@ -78,24 +83,67 @@ a{color:var(--acc)}
 .k-naechste b{font-size:16px}
 .k-naechste .u{color:var(--tx2);font-size:14px}
 .k-knoepfe{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
-.k-knoepfe button{flex:1 1 150px;min-height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);
-  color:var(--tx);font-weight:650;font-size:15px;cursor:pointer}
-.k-knoepfe button.primaer{background:var(--acc);color:var(--acc-tx);border-color:transparent}
+.k-knoepfe button,.k-knoepfe a{flex:1 1 140px;min-height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);
+  color:var(--tx);font-weight:650;font-size:15px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.k-knoepfe .primaer{background:var(--acc);color:var(--acc-tx);border-color:transparent}
+.k-knoepfe .schmal{flex:0 0 auto;min-width:60px}
 .k-fuss{color:var(--tx3);font-size:12.5px;margin-top:auto;padding-top:12px;display:flex;gap:10px;flex-wrap:wrap}
-h2{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin:26px 0 8px;font-weight:700}
-.link{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0;
+.liste{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.link{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;
   color:var(--tx);text-decoration:none;min-height:56px}
 .link .punkt{width:10px;height:10px;border-radius:50%;background:var(--acc);flex:none}
 .link .l-titel{font-weight:650}
 .link .l-meta{color:var(--tx2);font-size:13px;margin-top:2px}
 .link .pfeil{margin-left:auto;color:var(--tx3);font-size:18px}
+.suche{width:100%;height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:#0a0f1b;color:var(--tx);font-size:16px;outline:none;
+  margin-top:10px;-webkit-appearance:none;appearance:none}
+.suche:focus{border-color:var(--acc)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chip{height:36px;padding:0 13px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--tx2);font-size:14px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip.an{background:var(--acc);color:var(--acc-tx);border-color:transparent;font-weight:650}
+.chip .n{font-size:12px;opacity:.75}
+.chip.qr{border-style:dashed}
+.repo{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.repo .r-kopf{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.repo .r-name{font-weight:700;font-size:16px;font-family:ui-monospace,"SF Mono",Menlo,monospace;overflow-wrap:anywhere}
+.marke2{padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:650;background:var(--card2);color:var(--tx2);border:1px solid var(--line)}
+.marke2.privat{color:#f8d0a0;border-color:#5a3d1a}
+.marke2.seite{color:#9be8f5;border-color:#1d5a66}
+.marke2.portal{color:#d9c6ff;border-color:#4a3d7a}
+.marke2.archiv{color:var(--tx3)}
+.repo .r-text{color:var(--tx2);font-size:14px;line-height:1.4}
+.repo .r-meta{color:var(--tx3);font-size:12.5px;display:flex;gap:10px;flex-wrap:wrap}
+.repo .r-knoepfe{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.repo .r-knoepfe a,.repo .r-knoepfe button{min-height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:var(--card2);color:var(--tx);
+  font-weight:650;font-size:14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.repo .r-knoepfe .primaer{background:var(--acc);color:var(--acc-tx);border-color:transparent}
+.leer{color:var(--tx3);font-size:14px;padding:18px 4px}
 .fuss{color:var(--tx3);font-size:12.5px;margin-top:28px;line-height:1.55}
 .fuss kbd{font:inherit;color:var(--tx2)}
+
+/* Reiterleiste unten */
+#tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;gap:2px;
+  padding:6px 8px calc(env(safe-area-inset-bottom) + 6px);background:rgba(7,10,18,.86);border-top:1px solid var(--line);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+#tabs button{flex:1 1 0;max-width:180px;min-height:50px;border:none;background:transparent;color:var(--tx3);border-radius:12px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11.5px;font-weight:650;cursor:pointer}
+#tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#tabs button.an{color:var(--acc)}
+
+/* QR-Vollbild */
+#qr{position:fixed;inset:0;z-index:120;background:rgba(3,5,10,.96);display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer}
+.qr-karte{background:#fff;color:#111;border-radius:22px;padding:22px;max-width:min(92vw,560px);width:100%;text-align:center}
+.qr-karte .qr-titel{font-weight:800;font-size:20px;margin-bottom:12px;color:#111}
+.qr-karte svg{width:100%;height:auto;max-height:62vh;display:block;margin:0 auto}
+.qr-karte .qr-url{margin-top:12px;font-size:15px;color:#333;overflow-wrap:anywhere;font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.qr-karte .qr-hinweis{margin-top:8px;font-size:12.5px;color:#777}
+
 #laden{position:fixed;inset:0;background:rgba(7,10,18,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
   z-index:100;color:var(--tx2);font-size:15px;text-align:center;padding:20px}
 .spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--line2);border-top-color:var(--acc);animation:dreh .8s linear infinite}
 @keyframes dreh{to{transform:rotate(360deg)}}
-#toast{position:fixed;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom) + 18px);z-index:110;background:#3a1f1f;color:#f8d0d0;
+#toast{position:fixed;left:16px;right:16px;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 14px);z-index:110;background:#3a1f1f;color:#f8d0d0;
   padding:12px 16px;border-radius:14px;font-size:15px;text-align:center;opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s;pointer-events:none}
 #toast.zeig{opacity:1;transform:translateY(0)}
 @media (min-width:700px){#toast{max-width:560px;margin:0 auto}}
@@ -108,7 +156,7 @@ h2{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
   <form class="karte-login" id="login-form" autocomplete="on">
     <div class="logo">
       <img src="icons/icon-180.png" alt="">
-      <div><h1>Lerndashboards</h1><div class="unter">iPhone &amp; iPad · verschlüsselt</div></div>
+      <div><h1>Dashboard</h1><div class="unter">Repos · Präsentationen · Lerndashboards · Simulationen</div></div>
     </div>
     <label class="feld"><span>Zugang</span>
       <input type="text" id="login-name" name="username" autocomplete="username" value="Tom" autocapitalize="off" autocorrect="off" spellcheck="false">
@@ -119,7 +167,7 @@ h2{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
     <label class="haken"><input type="checkbox" id="login-merken"> Auf diesem Gerät angemeldet bleiben</label>
     <button class="knopf" type="submit" id="login-knopf">Anmelden</button>
     <div class="status" id="login-status"></div>
-    <div class="tipp versteckt" id="login-tipp"><b>Als App:</b> in Safari „Teilen → Zum Home-Bildschirm“. Die Dashboards laufen dann ohne Browserleisten im Vollbild, und das Häkchen oben ist vorbelegt.</div>
+    <div class="tipp versteckt" id="login-tipp"><b>Als App:</b> in Safari „Teilen → Zum Home-Bildschirm“. Präsentationen und Dashboards laufen dann ohne Browserleisten im Vollbild, und das Häkchen oben ist vorbelegt.</div>
   </form>
 </section>
 
@@ -128,44 +176,78 @@ h2{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
   <header id="kopf">
     <img src="icons/icon-180.png" alt="">
     <div style="min-width:0">
-      <h1>Lerndashboards</h1>
+      <h1>Dashboard</h1>
       <div class="sub"><span id="kopf-schuljahr"></span><span id="kopf-stand"></span><span class="marke versteckt" id="kopf-offline">Offline</span></div>
     </div>
     <div class="rechts"><button class="rund" id="knopf-abmelden" type="button">Abmelden</button></div>
   </header>
   <main>
-    <div class="karten" id="liste"></div>
-    <section id="oeffentlich" class="versteckt">
-      <h2>Öffentliche Lernseiten (ohne Passwort)</h2>
-      <div id="links"></div>
+    <section class="tab" id="tab-repos">
+      <div class="tab-kopf"><h2>Repos</h2><span class="tab-info" id="repos-info"></span></div>
+      <div class="chips" id="schueler-qr"></div>
+      <input class="suche" type="search" id="repos-suche" placeholder="Name, Beschreibung, Sprache, Thema …" autocomplete="off" autocapitalize="off">
+      <div class="chips" id="repos-filter"></div>
+      <div class="liste" id="repos-liste"></div>
     </section>
-    <p class="fuss" id="fuss">Alle Dashboards liegen nur als AES-256-Chiffrat auf GitHub Pages und werden erst hier nach der Anmeldung entschlüsselt.
-      Im Dashboard: Wischen blättert, Tippen zeigt unten die Bedienleiste (Lösung · Alle · Übersicht); <kbd>‹ Lerndashboards</kbd> führt hierher zurück.
+    <section class="tab versteckt" id="tab-praesentationen">
+      <div class="tab-kopf"><h2>Präsentationen</h2><span class="tab-info" id="praesentationen-info"></span></div>
+      <div class="karten" id="praesentationen-liste"></div>
+    </section>
+    <section class="tab versteckt" id="tab-lerndashboards">
+      <div class="tab-kopf"><h2>Lerndashboards</h2><span class="tab-info" id="lerndashboards-info"></span></div>
+      <div class="karten" id="lerndashboards-liste"></div>
+      <section id="oeffentlich" class="versteckt">
+        <h3>Öffentliche Lernseiten (ohne Passwort)</h3>
+        <div class="liste" id="lerndashboards-links"></div>
+      </section>
+    </section>
+    <section class="tab versteckt" id="tab-simulationen">
+      <div class="tab-kopf"><h2>Simulationen</h2><span class="tab-info" id="simulationen-info"></span></div>
+      <div class="karten" id="simulationen-liste"></div>
+      <h3>Auf GitHub Pages (öffentlich)</h3>
+      <div class="liste" id="simulationen-github"></div>
+    </section>
+    <p class="fuss" id="fuss">Alle Inhalte liegen nur als AES-256-Chiffrat auf GitHub Pages und werden erst hier nach der Anmeldung entschlüsselt.
+      In Dashboards und Präsentationen: Wischen blättert, Tippen zeigt die Bedienleiste; <kbd>‹ Dashboard</kbd> führt hierher zurück.
       Angemeldet als <span id="fuss-wer"></span>.</p>
   </main>
+  <nav id="tabs">
+    <button type="button" data-tab="repos"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>Repos</button>
+    <button type="button" data-tab="praesentationen"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M10 8l5 2.5-5 2.5z"/></svg>Präsentationen</button>
+    <button type="button" data-tab="lerndashboards"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h7"/></svg>Lerndashboards</button>
+    <button type="button" data-tab="simulationen"><svg viewBox="0 0 24 24"><path d="M2 12h3l2-7 4 14 3-10 2 6 2-3h4"/></svg>Simulationen</button>
+  </nav>
 </div>
 
+<div id="qr" class="versteckt"><div class="qr-karte"><div class="qr-titel"></div><div class="qr-bild"></div><div class="qr-url"></div><div class="qr-hinweis">Tippen schließt</div></div></div>
 <div id="laden" class="versteckt"><div class="spinner"></div><div id="laden-text">Entschlüssele …</div></div>
 <div id="toast" role="status"></div>
 
 <script>
 /* Alles in einer Funktion: Nach dem Entschlüsseln ersetzt document.write() dieses Dokument durch das
-   Dashboard – das Window-Objekt bleibt dabei bestehen. Deshalb legt das Portal keine globalen
-   Namen an und räumt seine Fenster-Listener vorher weg. */
+   Dashboard bzw. die Präsentation – das Window-Objekt bleibt dabei bestehen. Deshalb legt die Seite
+   keine globalen Namen an und räumt ihre Fenster-Listener vorher weg. Mehrteilige Einträge
+   (Simulationen mit css/, js/) liefert der Service Worker unter d/<Kennung>/… entschlüsselt aus. */
 (() => {
 "use strict";
 const $ = s => document.querySelector(s);
-const SESSION_KEY = "ld_sitzung";
-const NAME_KEY = "ld_name";
-const BASIS = location.href.split("#")[0].split("?")[0];        // Adresse des Portals ohne ?d= und #
+const SESSION_KEY = "dm_sitzung";
+const NAME_KEY = "dm_name";
+const TAB_KEY = "dm_tab";
+const ZIEL_KEY = "dm_ziel";
+const BASIS = new URL("./", location.href).href;                 // Adresse des Portals (Ordner, mit /)
 const STANDALONE = navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
 const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
 const WOCHENTAGE = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+const TABS = ["repos", "praesentationen", "lerndashboards", "simulationen"];
 
 let SESSION = null;            // {label, build, vaults:[{id,k,manifest}]}
 let MERKEN = false;
 let M = null;                  // entschlüsseltes Manifest
-let GEWUENSCHT = null;         // {id, hash} aus ?d=… beim Start
+let GEWUENSCHT = null;         // {id, hash, rel} aus ?d=… beim Start
+let TAB = "repos";
+let REPO_FILTER = "alle";
+let REPO_SUCHE = "";
 const vaultKeys = new Map();
 const fensterListener = [];
 const timer = [];
@@ -176,11 +258,12 @@ const pad2 = n => String(n).padStart(2, "0");
 function heuteIso(){ const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
 function ausIso(s){ const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ""); return m ? new Date(+m[1], +m[2]-1, +m[3]) : null; }
 function fmtDatum(iso){ const d = ausIso(iso); return d ? `${WOCHENTAGE[d.getDay()]} ${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}` : ""; }
-function fmtStand(s){ const d = ausIso(s); if(!d) return ""; const m = /T(\d{2}):(\d{2})/.exec(s || ""); return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}${m ? " " + m[1] + ":" + m[2] : ""}`; }
+function fmtTag(iso){ const d = ausIso(iso); return d ? `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}` : ""; }
+function fmtStand(s){ const d = ausIso(s); if(!d) return ""; const m = /T(\d{2}):(\d{2})/.exec(s || ""); return `${fmtTag(s)}${m ? " " + m[1] + ":" + m[2] : ""}`; }
 function fmtMiB(b){ return b ? (b / 1048576).toFixed(1).replace(".", ",") + " MB" : ""; }
 const sichereListe = l => Array.isArray(l) ? l : [];
 const istNetzfehler = e => e instanceof TypeError || /Failed to fetch|Load failed|NetworkError/i.test(String(e && e.message || ""));
-const fehlerText = e => istNetzfehler(e) ? "Keine Verbindung – und dieses Dashboard ist noch nicht offline gespeichert." : (e && e.message || String(e));
+const fehlerText = e => istNetzfehler(e) ? "Keine Verbindung – und dieser Eintrag ist noch nicht offline gespeichert." : (e && e.message || String(e));
 function fensterHoeren(name, fn, opt){ window.addEventListener(name, fn, opt); fensterListener.push([name, fn, opt]); }
 function spaeter(fn, ms){ const t = setTimeout(fn, ms); timer.push(t); return t; }
 let toastTimer = null;
@@ -188,6 +271,8 @@ function toast(text){ const t = $("#toast"); t.textContent = text; t.classList.a
 function loginStatus(text, fehler){ const s = $("#login-status"); s.textContent = text || ""; s.classList.toggle("fehler", !!fehler); }
 function ladenZeigen(text){ $("#laden-text").textContent = text || "Entschlüssele …"; $("#laden").classList.remove("versteckt"); }
 function ladenVerbergen(){ $("#laden").classList.add("versteckt"); }
+function lsLesen(k, standard){ try{ const v = localStorage.getItem(k); return v === null ? standard : v; }catch(e){ return standard; } }
+function lsSchreiben(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
 
 /* ─────────────────────────── Krypto (WebCrypto) ───────────────────────────
    Muss zu build.py passen: Passwort NFC + trim + Kleinschreibung → PBKDF2-SHA256 (600 000) →
@@ -264,8 +349,44 @@ async function ladeManifest(session){
   m._vault = v.id;
   return m;
 }
+function bereich(name){ return sichereListe(M && M.bereiche && M.bereiche[name]); }
+function alleEintraege(){ return TABS.filter(t => t !== "repos").flatMap(bereich); }
+function findeEintrag(id){ return alleEintraege().find(e => e.id === id) || null; }
 
-/* ─────────────────────────── Anzeige ─────────────────────────── */
+/* ─────────────────────────── Service Worker: Tresor übergeben ───────────────────────────
+   Für mehrteilige Einträge liefert sw.js die Dateien unter d/<Kennung>/… entschlüsselt aus.
+   Dafür bekommt er den Tresor-Schlüssel und die Zuordnung Datei → Kennung. */
+function dateiKarte(){
+  const karte = {};
+  for(const e of alleEintraege()){
+    if(e.typ !== "tresor") continue;
+    for(const [rel, d] of Object.entries(e.dateien || {})) karte[e.id + "/" + rel] = d.fid;
+  }
+  return karte;
+}
+async function tresorAnSW(){
+  if(!("serviceWorker" in navigator) || !SESSION) return false;
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    const sw = reg.active;
+    if(!sw) return false;
+    const v = SESSION.vaults[0];
+    const bestaetigt = new Promise(res => {
+      const h = ev => { if(ev.data && (ev.data.typ === "tresor-ok" || ev.data.typ === "tresor-fehler")){ navigator.serviceWorker.removeEventListener("message", h); res(ev.data.typ === "tresor-ok"); } };
+      navigator.serviceWorker.addEventListener("message", h);
+      spaeter(() => res(false), 2500);
+    });
+    sw.postMessage({ typ:"tresor", vid:v.id, k:b64zu(v.k), dateien:dateiKarte(), merken:MERKEN });
+    const ok = await bestaetigt;
+    if(!ok) return false;
+    return navigator.serviceWorker.controller ? true : "ungesteuert";
+  }catch(e){ console.warn("Service Worker:", e); return false; }
+}
+function swVergessen(){
+  try{ const c = navigator.serviceWorker && navigator.serviceWorker.controller; if(c) c.postMessage({typ:"vergessen"}); }catch(e){}
+}
+
+/* ─────────────────────────── Anzeige: Lerndashboards ─────────────────────────── */
 function naechste(e){
   const heute = heuteIso();
   const st = sichereListe(e.stunden).filter(s => s && s.datum).slice().sort((a, b) => a.datum < b.datum ? -1 : a.datum > b.datum ? 1 : 0);
@@ -276,7 +397,8 @@ function naechste(e){
 function einheitName(e){ return (e.meta && e.meta.einheit) || "Stunde"; }
 function mehrzahl(einheit, n){ const m = {Stunde:"Stunden", Teil:"Teile", Lektion:"Lektionen", Kapitel:"Kapitel", Woche:"Wochen"}[einheit] || einheit + "n"; return `${n} ${m}`; }
 function naechsteBezeichnung(einheit){ return ({Stunde:"Nächste Stunde", Teil:"Nächster Teil", Lektion:"Nächste Lektion", Kapitel:"Nächstes Kapitel", Woche:"Nächste Woche"})[einheit] || "Nächste " + einheit; }
-function karteHtml(e){
+function kuerzen(t, n){ t = String(t || ""); return t.length > n ? t.slice(0, n - 3).trimEnd() + " …" : t; }
+function karteLerndashboard(e){
   const meta = e.meta || {};
   const einheit = einheitName(e);
   const kuerzel = meta.kuerzel || "";
@@ -291,15 +413,16 @@ function karteHtml(e){
   } else if(n.letzte){
     block = `<div class="k-naechste"><span class="lbl">Zuletzt</span><b>${esc(fmtDatum(n.letzte.datum))} · ${esc(einheit)} ${esc(n.letzte.nr)}</b><span class="u">${esc(n.letzte.titel || "")}</span></div>`;
   }
-  const startKnopf = n.kommend ? `<button type="button" class="primaer" data-oeffnen="${esc(e.id)}" data-hash="#/${esc(n.kommend.nr)}/1">${esc(einheit)} ${esc(n.kommend.nr)} starten</button>` : "";
-  const fehlt = !e.fid ? `<div class="k-text" style="color:var(--gelb)">Nicht im Tresor: ${esc(e.hinweis || "Datei fehlt")}</div>` : "";
+  const bereit = !!(e.start && e.dateien && e.dateien[e.start]);
+  const startKnopf = (bereit && n.kommend) ? `<button type="button" class="primaer" data-oeffnen="${esc(e.id)}" data-hash="#/${esc(n.kommend.nr)}/1">${esc(einheit)} ${esc(n.kommend.nr)} starten</button>` : "";
+  const fehlt = !bereit ? `<div class="k-text" style="color:var(--gelb)">Nicht im Tresor: ${esc(e.hinweis || "Datei fehlt")}</div>` : "";
   const stunden = sichereListe(e.stunden).length;
   return `<article class="karte" style="--acc:${esc(e.farbe || "#16c5e8")}">
     <div class="k-titel">${esc(e.titel)}</div>
     <div class="k-meta">${esc(zeile)}</div>
-    ${e.beschreibung ? `<div class="k-text">${esc(e.beschreibung.length > 220 ? e.beschreibung.slice(0, 217).trimEnd() + " …" : e.beschreibung)}</div>` : ""}
+    ${e.beschreibung ? `<div class="k-text">${esc(kuerzen(e.beschreibung, 220))}</div>` : ""}
     ${block}${fehlt}
-    <div class="k-knoepfe">${e.fid ? `<button type="button" data-oeffnen="${esc(e.id)}">Dashboard öffnen</button>${startKnopf}` : ""}</div>
+    <div class="k-knoepfe">${bereit ? `<button type="button" data-oeffnen="${esc(e.id)}">Dashboard öffnen</button>${startKnopf}` : ""}</div>
     <div class="k-fuss">${stunden ? `<span>${esc(mehrzahl(einheit, stunden))}</span>` : ""}${e.groesse ? `<span>${esc(fmtMiB(e.groesse))}</span>` : ""}${e.geaendert ? `<span>Stand ${esc(fmtStand(e.geaendert))}</span>` : ""}</div>
   </article>`;
 }
@@ -309,17 +432,120 @@ function linkHtml(e){
   return `<a class="link" href="${esc(e.url)}" target="_blank" rel="noopener"><span class="punkt" style="background:${esc(farbe)}"></span>
     <span><div class="l-titel">${esc(e.titel)}</div><div class="l-meta">${esc(meta)}</div></span><span class="pfeil">↗</span></a>`;
 }
-function render(){
-  const eintraege = sichereListe(M && M.eintraege);
+
+/* ─────────────────────────── Anzeige: Präsentationen & Simulationen ─────────────────────────── */
+function kartePraesentation(e){
+  const bereit = !!(e.start && e.dateien && e.dateien[e.start]);
+  const klassen = sichereListe(e.klassen).map(k => { const m = e.module && e.module[k]; return m ? `${k} · ${m}` : k; }).join(" · ");
+  const zeile = [klassen || e.klasse, e.folien ? `${e.folien} Folien` : "", e.filme ? `${e.filme} Filme` : ""].filter(Boolean).join(" · ");
+  return `<article class="karte" style="--acc:${esc(e.farbe || "#ec4899")}">
+    <div class="k-titel">${esc(e.titel)}</div>
+    <div class="k-meta">${esc(zeile)}</div>
+    ${e.beschreibung ? `<div class="k-text">${esc(kuerzen(e.beschreibung, 260))}</div>` : ""}
+    ${!bereit ? `<div class="k-text" style="color:var(--gelb)">Nicht im Tresor: ${esc(e.hinweis || "Datei fehlt")}</div>` : ""}
+    <div class="k-knoepfe">${bereit ? `<button type="button" class="primaer" data-oeffnen="${esc(e.id)}">Präsentation öffnen</button>` : ""}</div>
+    <div class="k-fuss">${e.groesse ? `<span>${esc(fmtMiB(e.groesse))}</span>` : ""}${e.geaendert ? `<span>Stand ${esc(fmtStand(e.geaendert))}</span>` : ""}</div>
+  </article>`;
+}
+function karteSimulation(e){
+  const bereit = !!(e.start && e.dateien && e.dateien[e.start]);
+  const zeile = [e.klasse, e.fach, e.thema, e.einheit, e.jahr ? e.jahr.replace("-", " – ") : ""].filter(Boolean).join(" · ");
+  const dateien = Object.keys(e.dateien || {}).length;
+  return `<article class="karte" style="--acc:${esc(e.farbe || "#14b8a6")}">
+    <div class="k-titel">${esc(e.titel)}</div>
+    <div class="k-meta">${esc(zeile)}</div>
+    ${e.beschreibung ? `<div class="k-text">${esc(kuerzen(e.beschreibung, 220))}</div>` : ""}
+    ${!bereit ? `<div class="k-text" style="color:var(--gelb)">Nicht im Tresor: ${esc(e.hinweis || "Datei fehlt")}</div>` : ""}
+    <div class="k-knoepfe">${bereit ? `<button type="button" class="primaer" data-oeffnen="${esc(e.id)}">Öffnen</button>` : ""}</div>
+    <div class="k-fuss">${e.datum ? `<span>${esc(fmtTag(e.datum))}</span>` : ""}${e.mehrteilig ? `<span>${dateien} Dateien</span>` : ""}${e.groesse ? `<span>${esc(fmtMiB(e.groesse))}</span>` : ""}</div>
+  </article>`;
+}
+
+/* ─────────────────────────── Anzeige: Repos ─────────────────────────── */
+function repos(){ return sichereListe(M && M.repos && M.repos.liste); }
+function repoPasst(r){
+  if(REPO_FILTER === "webseite" && !r.pages) return false;
+  if(REPO_FILTER === "simulationen" && !r.simulation) return false;
+  if(REPO_FILTER === "portale" && !r.portal) return false;
+  if(REPO_FILTER === "privat" && !r.privat) return false;
+  if(REPO_FILTER === "archiv" && !r.archiviert) return false;
+  if(REPO_FILTER !== "archiv" && r.archiviert) return false;
+  if(REPO_SUCHE){
+    const t = [r.name, r.beschreibung, r.sprache, sichereListe(r.topics).join(" ")].join(" ").toLowerCase();
+    if(!t.includes(REPO_SUCHE)) return false;
+  }
+  return true;
+}
+function repoHtml(r){
+  const marken = [
+    r.privat ? `<span class="marke2 privat">privat</span>` : `<span class="marke2">öffentlich</span>`,
+    r.pages ? `<span class="marke2 seite">Webseite</span>` : "",
+    r.portal ? `<span class="marke2 portal">Portal · verschlüsselt</span>` : "",
+    r.archiviert ? `<span class="marke2 archiv">Archiv</span>` : "",
+    r.fork ? `<span class="marke2">Fork</span>` : "",
+  ].filter(Boolean).join("");
+  const meta = [r.sprache, r.gepusht ? "zuletzt " + fmtTag(r.gepusht) : "", sichereListe(r.topics).length ? sichereListe(r.topics).join(" · ") : ""].filter(Boolean);
+  return `<div class="repo">
+    <div class="r-kopf"><span class="r-name">${esc(r.name)}</span>${marken}</div>
+    ${r.beschreibung ? `<div class="r-text">${esc(r.beschreibung)}</div>` : ""}
+    <div class="r-meta">${meta.map(m => `<span>${esc(m)}</span>`).join("")}</div>
+    <div class="r-knoepfe">
+      ${r.pages ? `<a class="primaer" href="${esc(r.pages)}" target="_blank" rel="noopener">Seite öffnen ↗</a>` : ""}
+      <a href="${esc(r.url)}" target="_blank" rel="noopener">GitHub ↗</a>
+      ${r.pages && r.qr ? `<button type="button" data-qr="${esc(r.name)}">QR-Code</button>` : ""}
+    </div>
+  </div>`;
+}
+function renderRepos(){
+  const alle = repos();
+  const zaehle = f => { const alt = REPO_FILTER; REPO_FILTER = f; const n = alle.filter(repoPasst).length; REPO_FILTER = alt; return n; };
+  const chips = [["alle", "Alle"], ["webseite", "Webseite"], ["simulationen", "Simulationen"], ["portale", "Portale"], ["privat", "Privat"], ["archiv", "Archiv"]];
+  $("#repos-filter").innerHTML = chips.map(([k, t]) => `<button type="button" class="chip${REPO_FILTER === k ? " an" : ""}" data-filter="${k}">${t} <span class="n">${zaehle(k)}</span></button>`).join("");
+  const liste = alle.filter(repoPasst);
+  $("#repos-liste").innerHTML = liste.length ? liste.map(repoHtml).join("") : `<div class="leer">Kein Repo passt zu Suche und Filter.</div>`;
+  const privat = alle.filter(r => r.privat).length, seiten = alle.filter(r => r.pages).length;
+  const R = M.repos || {};
+  $("#repos-info").textContent = alle.length ? `${alle.length} Repos · ${privat} privat · ${seiten} mit Webseite · Stand ${fmtStand(R.stand)}${R.fehler ? " · ⚠︎ " + R.fehler : ""}` : (R.fehler ? "⚠︎ " + R.fehler : "keine Repos im Tresor");
+  const apps = sichereListe(R.schueler_apps);
+  $("#schueler-qr").innerHTML = apps.map((a, i) => `<button type="button" class="chip qr" data-qr-app="${i}">QR · ${esc(a.titel)}</button>`).join("");
+}
+function renderLerndashboards(){
+  const eintraege = bereich("lerndashboards");
   const tresor = eintraege.filter(e => e.typ === "tresor");
   const links = eintraege.filter(e => e.typ === "link");
-  $("#liste").innerHTML = tresor.length ? tresor.map(karteHtml).join("") : `<div class="k-text">Noch kein Dashboard im Tresor.</div>`;
-  $("#links").innerHTML = links.map(linkHtml).join("");
+  $("#lerndashboards-liste").innerHTML = tresor.length ? tresor.map(karteLerndashboard).join("") : `<div class="leer">Noch kein Lerndashboard im Tresor.</div>`;
+  $("#lerndashboards-links").innerHTML = links.map(linkHtml).join("");
   $("#oeffentlich").classList.toggle("versteckt", !links.length);
+  $("#lerndashboards-info").textContent = `${tresor.length} im Tresor${links.length ? ` · ${links.length} öffentlich` : ""}`;
+}
+function renderPraesentationen(){
+  const liste = bereich("praesentationen").filter(e => e.typ === "tresor");
+  $("#praesentationen-liste").innerHTML = liste.length ? liste.map(kartePraesentation).join("") : `<div class="leer">Noch keine Präsentation im Tresor.</div>`;
+  $("#praesentationen-info").textContent = `${liste.length} im Tresor`;
+}
+function renderSimulationen(){
+  const liste = bereich("simulationen").filter(e => e.typ === "tresor");
+  $("#simulationen-liste").innerHTML = liste.length ? liste.map(karteSimulation).join("") : `<div class="leer">Keine lokale Simulation im Tresor.</div>`;
+  const gh = repos().filter(r => r.simulation && !r.archiviert);
+  $("#simulationen-github").innerHTML = gh.length ? gh.map(r => `<div class="link"><span class="punkt" style="background:var(--tuerkis)"></span>
+      <span style="min-width:0"><div class="l-titel">${esc(r.name)}</div><div class="l-meta">${esc(kuerzen(r.beschreibung || "", 140))}</div></span>
+      <span class="pfeil" style="display:flex;gap:6px"><a class="chip" href="${esc(r.pages)}" target="_blank" rel="noopener">Öffnen ↗</a>${r.qr ? `<button type="button" class="chip" data-qr="${esc(r.name)}">QR</button>` : ""}</span></div>`).join("")
+    : `<div class="leer">Keine Repos mit Webseite.</div>`;
+  $("#simulationen-info").textContent = `${liste.length} lokal · ${gh.length} auf GitHub Pages`;
+}
+function render(){
   $("#kopf-schuljahr").textContent = M.schuljahr || "";
   $("#kopf-stand").textContent = M.erstellt ? "Stand " + fmtStand(M.erstellt) : "";
   $("#fuss-wer").textContent = (SESSION && SESSION.label) || "Leser";
   $("#kopf-offline").classList.toggle("versteckt", navigator.onLine !== false);
+  renderRepos(); renderPraesentationen(); renderLerndashboards(); renderSimulationen();
+  tabZeigen(TAB);
+}
+function tabZeigen(name){
+  if(!TABS.includes(name)) name = "repos";
+  TAB = name; lsSchreiben(TAB_KEY, name);
+  for(const t of TABS) $("#tab-" + t).classList.toggle("versteckt", t !== name);
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("an", b.dataset.tab === name));
 }
 function appZeigen(){
   $("#anmeldung").classList.add("versteckt");
@@ -333,25 +559,58 @@ function loginZeigen(text, fehler){
   loginStatus(text || "", fehler);
 }
 
-/* ─────────────────────────── Dashboard öffnen ───────────────────────────
-   Die entschlüsselte HTML-Datei ersetzt dieses Dokument (document.write). Adresse bleibt die des
-   Portals, ergänzt um ?d=<Kennung> und den Folien-Anker (#/Stunde/Folie) – so startet ein Neuladen
-   wieder im selben Dashboard, und Verknüpfungen wie …/?d=prodi1-dp2et#/5/1 funktionieren. */
+/* ─────────────────────────── QR-Code ─────────────────────────── */
+function qrSvg(zeilen){
+  const n = zeilen.length, rand = 2, g = n + 2 * rand;
+  let d = "";
+  for(let y = 0; y < n; y++){
+    const z = zeilen[y]; let x = 0;
+    while(x < n){
+      if(z[x] === "1"){ let l = 1; while(x + l < n && z[x + l] === "1") l++; d += `M${x + rand} ${y + rand}h${l}v1h-${l}z`; x += l; }
+      else x++;
+    }
+  }
+  return `<svg viewBox="0 0 ${g} ${g}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"><rect width="${g}" height="${g}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+}
+function qrZeigen(titel, url, zeilen){
+  if(!Array.isArray(zeilen) || !zeilen.length){ toast("Für diese Adresse gibt es keinen QR-Code."); return; }
+  $("#qr .qr-titel").textContent = titel;
+  $("#qr .qr-bild").innerHTML = qrSvg(zeilen);
+  $("#qr .qr-url").textContent = url;
+  $("#qr").classList.remove("versteckt");
+}
+
+/* ─────────────────────────── Eintrag öffnen ───────────────────────────
+   Einteilige Einträge (Lerndashboards, Präsentationen, einfache Simulationen): die entschlüsselte
+   HTML-Datei ersetzt dieses Dokument (document.write). Adresse bleibt die des Portals, ergänzt um
+   ?d=<Kennung> und den Anker (#/Stunde/Folie bzw. #Folie) – Neuladen startet wieder im selben Eintrag.
+   Mehrteilige Einträge (css/, js/ …): Service Worker liefert d/<Kennung>/<Datei> entschlüsselt aus. */
 function rueckwegHtml(){
   const ziel = JSON.stringify(BASIS);
   return `
-<style id="ld-portal-css">
-#ld-portal{position:fixed;z-index:60;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);left:calc(env(safe-area-inset-left,0px) + 12px);display:none;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:16px;border:1px solid rgba(255,255,255,.16);background:rgba(7,10,18,.78);color:#aab4c6;font:600 12.5px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;text-decoration:none;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-body.mode-dash #ld-portal{display:inline-flex}
-#ld-portal:hover{color:#fff;border-color:rgba(255,255,255,.32)}
+<style id="dm-css">
+#dm-portal{position:fixed;z-index:60;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);left:calc(env(safe-area-inset-left,0px) + 12px);display:none;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:16px;border:1px solid rgba(255,255,255,.16);background:rgba(7,10,18,.78);color:#aab4c6;font:600 12.5px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;text-decoration:none;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+body.mode-dash #dm-portal,#dm-portal.dm-immer{display:inline-flex}
+#dm-portal:hover{color:#fff;border-color:rgba(255,255,255,.32)}
+#dm-bar{position:fixed;z-index:60;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:96vw;padding:6px;border-radius:16px;border:1px solid rgba(255,255,255,.14);background:rgba(7,10,18,.8);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .25s}
+#dm-bar.an{opacity:1;pointer-events:auto}
+#dm-bar button{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 13px;border-radius:11px;border:none;background:transparent;color:#aab4c6;font:650 14px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;cursor:pointer}
+#dm-bar button:hover{background:rgba(255,255,255,.08);color:#fff}
 @media (max-width:640px){#ctrl{flex-wrap:wrap;justify-content:center;max-width:96vw}}
-@media print{#ld-portal{display:none!important}}
+@media print{#dm-portal,#dm-bar{display:none!important}}
 </style>
-<a id="ld-portal" href="${esc(BASIS)}" title="Zurück zur Übersicht der Lerndashboards">‹ Lerndashboards</a>
+<a id="dm-portal" href="${esc(BASIS)}" title="Zurück zum Dashboard">‹ Dashboard</a>
 <script>(function(){var ziel=${ziel};function zurueck(e){e.preventDefault();e.stopPropagation();location.replace(ziel);}
-var a=document.getElementById('ld-portal');if(a)a.addEventListener('click',zurueck);
-var c=document.getElementById('ctrl');if(c){var k=document.createElement('button');k.type='button';k.title='Zurück zur Übersicht der Lerndashboards';
-k.innerHTML='<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/><path d="M4 12h16"/></svg>Lerndashboards';k.addEventListener('click',zurueck);c.insertBefore(k,c.firstChild);}})();<\/script>
+var a=document.getElementById('dm-portal');if(a)a.addEventListener('click',zurueck);
+var c=document.getElementById('ctrl');
+if(c){var k=document.createElement('button');k.type='button';k.title='Zurück zum Dashboard';k.innerHTML='<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/><path d="M4 12h16"/></svg>Dashboard';k.addEventListener('click',zurueck);c.insertBefore(k,c.firstChild);}
+else if(window.KI&&document.querySelector('section.slide')){var b=document.createElement('div');b.id='dm-bar';
+var defs=[['‹ Dashboard',null],['‹','ArrowLeft'],['›','ArrowRight'],['Übersicht','o'],['Auflösung','a'],['Vollbild','f']];
+defs.forEach(function(d){var x=document.createElement('button');x.type='button';x.textContent=d[0];x.addEventListener('click',function(e){e.stopPropagation();if(!d[1]){zurueck(e);return;}document.dispatchEvent(new KeyboardEvent('keydown',{key:d[1],bubbles:true,cancelable:true}));zeig();});b.appendChild(x);});
+document.body.appendChild(b);var t;function zeig(){b.classList.add('an');clearTimeout(t);t=setTimeout(function(){b.classList.remove('an');},2800);}
+window.addEventListener('touchstart',zeig,{passive:true});window.addEventListener('mousemove',zeig);zeig();}
+else if(a){a.classList.add('dm-immer');}
+})();<\/script>
 `;
 }
 function aufraeumen(){
@@ -369,14 +628,27 @@ function uebergeben(html){
   document.write(html);
   document.close();
 }
-async function oeffnen(id, hash){
-  const e = sichereListe(M && M.eintraege).find(x => x.id === id && x.typ === "tresor");
-  if(!e){ toast("Dieses Dashboard gibt es nicht (mehr)."); return; }
-  if(!e.fid){ toast("Dieses Dashboard liegt nicht im Tresor."); return; }
+async function oeffnen(id, hash, rel){
+  const e = findeEintrag(id);
+  if(!e){ toast("Diesen Eintrag gibt es nicht (mehr)."); return; }
+  if(e.typ === "link"){ window.open(e.url, "_blank", "noopener"); return; }
+  if(!e.start || !e.dateien || !e.dateien[e.start]){ toast("Dieser Eintrag liegt nicht im Tresor."); return; }
   ladenZeigen(`Entschlüssele „${e.titel}“ …`);
   try{
+    if(e.mehrteilig || rel){
+      const sw = await tresorAnSW();
+      if(sw === "ungesteuert"){
+        // Erster Besuch / Neuladen ohne Steuerung: einmal neu laden, danach führt der Worker die Adresse aus.
+        try{ sessionStorage.setItem(ZIEL_KEY, JSON.stringify({id, hash: hash || "", rel: rel || ""})); }catch(err){}
+        location.reload();
+        return;
+      }
+      if(!sw) throw new Error("Dieser Eintrag braucht den Service Worker – kein privater Modus, Safari aktuell halten.");
+      location.assign(BASIS + "d/" + encodeURIComponent(e.id) + "/" + (rel || e.start) + (hash || ""));
+      return;
+    }
     const key = await vaultKey(M._vault);
-    const r = await fetch(`vaults/${M._vault}/f/${e.fid}.enc`);
+    const r = await fetch(`vaults/${M._vault}/f/${e.dateien[e.start].fid}.enc`);
     if(!r.ok) throw new Error("Datei nicht erreichbar (" + r.status + ")");
     const html = new TextDecoder().decode(await entschluesseleBlock(key, await r.arrayBuffer()));
     try{ history.replaceState(null, "", BASIS + "?d=" + encodeURIComponent(e.id) + (hash || "")); }catch(err){}
@@ -398,6 +670,7 @@ async function pruefeAktualisierung(){
     SESSION.build = idx.build;
     sitzungSpeichern(SESSION, MERKEN);
     render();
+    tresorAnSW();
   }catch(e){ /* offline oder Tresor neu verschlüsselt – zeigt sich beim nächsten Öffnen */ }
 }
 
@@ -415,21 +688,32 @@ $("#login-form").addEventListener("submit", async ev => {
     SESSION = session; MERKEN = $("#login-merken").checked;
     M = await ladeManifest(session);
     sitzungSpeichern(session, MERKEN);
-    try{ localStorage.setItem(NAME_KEY, session.label || $("#login-name").value || "Tom"); }catch(e){}
+    lsSchreiben(NAME_KEY, session.label || $("#login-name").value || "Tom");
     $("#login-pw").value = ""; loginStatus("");
     appZeigen();
-    if(GEWUENSCHT){ const g = GEWUENSCHT; GEWUENSCHT = null; oeffnen(g.id, g.hash); }
+    tresorAnSW();
+    if(GEWUENSCHT){ const g = GEWUENSCHT; GEWUENSCHT = null; oeffnen(g.id, g.hash, g.rel); }
   }catch(e){
     console.warn(e); SESSION = null;
     loginStatus(istNetzfehler(e) ? "Keine Verbindung zum Portal." : "Fehler: " + (e.message || e), true);
   }finally{ knopf.disabled = false; }
 });
-$("#liste").addEventListener("click", ev => {
+$("#app").addEventListener("click", ev => {
   const b = ev.target.closest("button[data-oeffnen]");
-  if(!b) return;
-  oeffnen(b.dataset.oeffnen, b.dataset.hash || "");
+  if(b){ oeffnen(b.dataset.oeffnen, b.dataset.hash || "", ""); return; }
+  const q = ev.target.closest("[data-qr]");
+  if(q){ const r = repos().find(x => x.name === q.dataset.qr); if(r) qrZeigen(r.name, r.pages, r.qr); return; }
+  const qa = ev.target.closest("[data-qr-app]");
+  if(qa){ const a = sichereListe(M.repos && M.repos.schueler_apps)[+qa.dataset.qrApp]; if(a) qrZeigen(a.titel, a.adresse, a.qr); return; }
+  const f = ev.target.closest("button[data-filter]");
+  if(f){ REPO_FILTER = f.dataset.filter; renderRepos(); return; }
+  const t = ev.target.closest("#tabs button[data-tab]");
+  if(t){ tabZeigen(t.dataset.tab); window.scrollTo(0, 0); return; }
 });
+$("#repos-suche").addEventListener("input", ev => { REPO_SUCHE = ev.target.value.trim().toLowerCase(); renderRepos(); });
+$("#qr").addEventListener("click", () => $("#qr").classList.add("versteckt"));
 $("#knopf-abmelden").addEventListener("click", () => {
+  swVergessen();
   sitzungVerwerfen(); SESSION = null; M = null; vaultKeys.clear();
   try{ history.replaceState(null, "", BASIS); }catch(e){}
   loginZeigen("Abgemeldet.");
@@ -438,13 +722,15 @@ $("#knopf-abmelden").addEventListener("click", () => {
 /* ─────────────────────────── Start ─────────────────────────── */
 async function start(){
   const p = new URLSearchParams(location.search);
-  if(p.get("d")) GEWUENSCHT = { id: p.get("d"), hash: location.hash || "" };
+  if(p.get("d")) GEWUENSCHT = { id: p.get("d"), hash: location.hash || "", rel: p.get("r") || "" };
+  try{ const z = sessionStorage.getItem(ZIEL_KEY); if(z){ sessionStorage.removeItem(ZIEL_KEY); GEWUENSCHT = JSON.parse(z); } }catch(e){}
   if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(e => console.warn("Service Worker:", e)); }
   fensterHoeren("online", () => $("#kopf-offline").classList.add("versteckt"));
   fensterHoeren("offline", () => $("#kopf-offline").classList.remove("versteckt"));
-  try{ $("#login-name").value = localStorage.getItem(NAME_KEY) || "Tom"; }catch(e){}
+  $("#login-name").value = lsLesen(NAME_KEY, "Tom");
   $("#login-merken").checked = STANDALONE;
   $("#login-tipp").classList.toggle("versteckt", !(IOS && !STANDALONE));
+  TAB = lsLesen(TAB_KEY, "repos");
 
   const gespeichert = sitzungLesen();
   if(gespeichert && gespeichert.s && Array.isArray(gespeichert.s.vaults) && gespeichert.s.vaults.length){
@@ -453,7 +739,8 @@ async function start(){
       SESSION = gespeichert.s; MERKEN = gespeichert.merken;
       M = await ladeManifest(SESSION);
       appZeigen();
-      if(GEWUENSCHT){ const g = GEWUENSCHT; GEWUENSCHT = null; oeffnen(g.id, g.hash); return; }
+      tresorAnSW();
+      if(GEWUENSCHT){ const g = GEWUENSCHT; GEWUENSCHT = null; oeffnen(g.id, g.hash, g.rel); return; }
       pruefeAktualisierung();
       return;
     }catch(e){
@@ -463,7 +750,7 @@ async function start(){
         loginZeigen("Keine Verbindung – bitte später erneut versuchen.", true);
       } else {
         // Tresor neu verschlüsselt oder Passwort geändert: alte Sitzung ist wertlos.
-        sitzungVerwerfen();
+        sitzungVerwerfen(); swVergessen();
         loginZeigen("Der Tresor wurde neu verschlüsselt – bitte neu anmelden.", true);
       }
       return;
