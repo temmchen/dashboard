@@ -17,12 +17,12 @@
 <title>Dashboard · Tom Bleyer</title>
 <style>
 /* ═══════════════════════ Farben & Grundlagen ═══════════════════════
-   Dunkel wie die Lerndashboards (Hintergrund #070a12, Akzent Cyan). */
+   Dunkel wie die Lerndashboards (Hintergrund #070a12, Akzent Cyan). Kachelfarben wie Dashboard Pro. */
 :root{
   --bg:#070a12; --card:#0c111d; --card2:#121a2b; --line:#1f2738; --line2:#2a3449;
   --tx:#e8edf5; --tx2:#aab4c6; --tx3:#6b7690; --acc:#16c5e8; --acc-tx:#04202a;
-  --rot:#f87171; --gruen:#4ade80; --gelb:#fbbf24; --lila:#a78bfa; --pink:#ec4899; --tuerkis:#14b8a6;
-  --radius:16px; --tab-h:64px;
+  --rot:#f87171; --gruen:#4ade80; --gelb:#fbbf24; --lila:#a78bfa; --pink:#ec4899; --tuerkis:#14b8a6; --blau:#0ea5e9; --grau:#8b95a7;
+  --radius:16px;
   color-scheme:dark;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
@@ -33,7 +33,7 @@ button,input{font:inherit}
 .versteckt{display:none!important}
 a{color:var(--acc)}
 h2{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin:22px 0 8px;font-weight:700}
-h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin:26px 0 8px;font-weight:700}
+h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin:24px 0 8px;font-weight:700}
 
 /* ═══════════════════════ Anmeldung ═══════════════════════ */
 #anmeldung{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;
@@ -60,18 +60,52 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
 
 /* ═══════════════════════ App ═══════════════════════ */
 #app{max-width:900px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) calc(env(safe-area-inset-right) + 16px)
-  calc(var(--tab-h) + env(safe-area-inset-bottom) + 24px) calc(env(safe-area-inset-left) + 16px)}
+  calc(env(safe-area-inset-bottom) + 40px) calc(env(safe-area-inset-left) + 16px)}
 #kopf{display:flex;align-items:center;gap:12px;padding:6px 0 10px}
 #kopf img{width:42px;height:42px;border-radius:11px;flex:none}
 #kopf h1{margin:0;font-size:20px;line-height:1.2}
 #kopf .sub{color:var(--tx2);font-size:13px;display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
-#kopf .rechts{margin-left:auto;flex:none}
-.rund{height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:transparent;color:var(--tx2);cursor:pointer;font-size:14px}
+#kopf .rechts{margin-left:auto;flex:none;display:flex;gap:8px}
+.rund{height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:transparent;color:var(--tx2);cursor:pointer;font-size:14px;white-space:nowrap}
+.rund.start{color:var(--acc);border-color:rgba(22,197,232,.4);font-weight:650}
 .marke{padding:2px 8px;border-radius:999px;background:#3a1f1f;color:#f8b4b4;font-size:12px}
-.tab-kopf{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:8px 0 4px}
-.tab-kopf h2{margin:0;font-size:18px;letter-spacing:0;text-transform:none;color:var(--tx)}
-.tab-info{color:var(--tx3);font-size:13px}
-.karten{display:grid;grid-template-columns:1fr;gap:12px;margin-top:10px}
+
+/* Startseite: Rechner oben, vier Kacheln */
+.rechner{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rechner .r-kachel{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--gelb);border-radius:var(--radius);padding:14px 14px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.rechner .r-titel{font-weight:700;font-size:16px;line-height:1.25}
+.rechner .r-adresse{color:var(--tx3);font-size:12px;font-family:ui-monospace,"SF Mono",Menlo,monospace;overflow-wrap:anywhere}
+.rechner .r-knoepfe{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.rechner .r-knoepfe a,.rechner .r-knoepfe button{flex:1 1 90px;min-height:42px;padding:0 10px;border-radius:11px;border:1px solid var(--line2);background:var(--card2);color:var(--tx);
+  font-weight:650;font-size:14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.rechner .r-knoepfe .primaer{background:var(--gelb);color:#2a1e00;border-color:transparent}
+.kacheln{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.kachel{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px 14px;min-height:132px;cursor:pointer;color:var(--tx);
+  display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
+.kachel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--kf)}
+.kachel .k-symbol{width:40px;height:40px;border-radius:12px;background:color-mix(in srgb,var(--kf) 22%,transparent);display:flex;align-items:center;justify-content:center;color:var(--kf)}
+.kachel .k-symbol svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.kachel .k-name{font-weight:800;font-size:17px;line-height:1.2}
+.kachel .k-unter{color:var(--tx2);font-size:13px;line-height:1.4}
+.kachel .k-pfeil{position:absolute;right:14px;top:14px;color:var(--tx3);font-size:18px}
+.kachel:active{background:var(--card2)}
+@media (min-width:760px){.kachel{min-height:150px}.kachel .k-name{font-size:19px}}
+
+/* Bereiche: Suche, Facetten, Listen */
+.bereich-kopf{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:6px 0 4px}
+.bereich-kopf h2{margin:0;font-size:12.5px}
+.bereich-info{color:var(--tx3);font-size:13px}
+.suche{width:100%;height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:#0a0f1b;color:var(--tx);font-size:16px;outline:none;
+  margin-top:8px;-webkit-appearance:none;appearance:none}
+.suche:focus{border-color:var(--acc)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chips.klein{margin-top:8px}
+.chip{height:36px;padding:0 13px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--tx2);font-size:14px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none}
+.chip.an{background:var(--acc);color:var(--acc-tx);border-color:transparent;font-weight:650}
+.chip .n{font-size:12px;opacity:.75}
+.chips.klein .chip{height:32px;font-size:13px}
+.karten{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
 @media (min-width:760px){.karten{grid-template-columns:1fr 1fr}}
 .karte{position:relative;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:var(--radius);
   padding:16px 18px;display:flex;flex-direction:column}
@@ -86,24 +120,25 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
 .k-knoepfe button,.k-knoepfe a{flex:1 1 140px;min-height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);
   color:var(--tx);font-weight:650;font-size:15px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 .k-knoepfe .primaer{background:var(--acc);color:var(--acc-tx);border-color:transparent}
-.k-knoepfe .schmal{flex:0 0 auto;min-width:60px}
 .k-fuss{color:var(--tx3);font-size:12.5px;margin-top:auto;padding-top:12px;display:flex;gap:10px;flex-wrap:wrap}
 .liste{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.gruppe{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);font-weight:700;margin:14px 0 2px}
+.gruppe:first-child{margin-top:4px}
+.zeile{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-height:60px}
+.zeile .punkt{width:10px;height:10px;border-radius:50%;background:var(--acc);flex:none}
+.zeile .z-mitte{flex:1;min-width:0}
+.zeile .z-titel{font-weight:650;line-height:1.3}
+.zeile .z-meta{color:var(--tx2);font-size:13px;margin-top:2px}
+.zeile .z-knoepfe{display:flex;gap:6px;flex:none}
+.zeile .z-knoepfe button,.zeile .z-knoepfe a{min-height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:var(--card2);color:var(--tx);
+  font-weight:650;font-size:14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.zeile .z-knoepfe .primaer{background:var(--acc);color:var(--acc-tx);border-color:transparent}
 .link{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;
   color:var(--tx);text-decoration:none;min-height:56px}
 .link .punkt{width:10px;height:10px;border-radius:50%;background:var(--acc);flex:none}
 .link .l-titel{font-weight:650}
 .link .l-meta{color:var(--tx2);font-size:13px;margin-top:2px}
 .link .pfeil{margin-left:auto;color:var(--tx3);font-size:18px}
-.suche{width:100%;height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:#0a0f1b;color:var(--tx);font-size:16px;outline:none;
-  margin-top:10px;-webkit-appearance:none;appearance:none}
-.suche:focus{border-color:var(--acc)}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.chip{height:36px;padding:0 13px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--tx2);font-size:14px;cursor:pointer;
-  display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
-.chip.an{background:var(--acc);color:var(--acc-tx);border-color:transparent;font-weight:650}
-.chip .n{font-size:12px;opacity:.75}
-.chip.qr{border-style:dashed}
 .repo{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
 .repo .r-kopf{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .repo .r-name{font-weight:700;font-size:16px;font-family:ui-monospace,"SF Mono",Menlo,monospace;overflow-wrap:anywhere}
@@ -122,15 +157,6 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
 .fuss{color:var(--tx3);font-size:12.5px;margin-top:28px;line-height:1.55}
 .fuss kbd{font:inherit;color:var(--tx2)}
 
-/* Reiterleiste unten */
-#tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;gap:2px;
-  padding:6px 8px calc(env(safe-area-inset-bottom) + 6px);background:rgba(7,10,18,.86);border-top:1px solid var(--line);
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
-#tabs button{flex:1 1 0;max-width:180px;min-height:50px;border:none;background:transparent;color:var(--tx3);border-radius:12px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11.5px;font-weight:650;cursor:pointer}
-#tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-#tabs button.an{color:var(--acc)}
-
 /* QR-Vollbild */
 #qr{position:fixed;inset:0;z-index:120;background:rgba(3,5,10,.96);display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer}
 .qr-karte{background:#fff;color:#111;border-radius:22px;padding:22px;max-width:min(92vw,560px);width:100%;text-align:center}
@@ -143,7 +169,7 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
   z-index:100;color:var(--tx2);font-size:15px;text-align:center;padding:20px}
 .spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--line2);border-top-color:var(--acc);animation:dreh .8s linear infinite}
 @keyframes dreh{to{transform:rotate(360deg)}}
-#toast{position:fixed;left:16px;right:16px;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 14px);z-index:110;background:#3a1f1f;color:#f8d0d0;
+#toast{position:fixed;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom) + 18px);z-index:110;background:#3a1f1f;color:#f8d0d0;
   padding:12px 16px;border-radius:14px;font-size:15px;text-align:center;opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s;pointer-events:none}
 #toast.zeig{opacity:1;transform:translateY(0)}
 @media (min-width:700px){#toast{max-width:560px;margin:0 auto}}
@@ -156,7 +182,7 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
   <form class="karte-login" id="login-form" autocomplete="on">
     <div class="logo">
       <img src="icons/icon-180.png" alt="">
-      <div><h1>Dashboard</h1><div class="unter">Repos · Präsentationen · Lerndashboards · Simulationen</div></div>
+      <div><h1>Dashboard</h1><div class="unter">Lerndashboards · Simulationen · Präsentationen · GitHub</div></div>
     </div>
     <label class="feld"><span>Zugang</span>
       <input type="text" id="login-name" name="username" autocomplete="username" value="Tom" autocapitalize="off" autocorrect="off" spellcheck="false">
@@ -174,49 +200,62 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
 <!-- ═══════════════════════ App ═══════════════════════ -->
 <div id="app" class="versteckt">
   <header id="kopf">
-    <img src="icons/icon-180.png" alt="">
+    <button class="rund start versteckt" id="knopf-start" type="button">‹ Start</button>
+    <img src="icons/icon-180.png" alt="" id="kopf-bild">
     <div style="min-width:0">
-      <h1>Dashboard</h1>
+      <h1 id="kopf-titel">Dashboard</h1>
       <div class="sub"><span id="kopf-schuljahr"></span><span id="kopf-stand"></span><span class="marke versteckt" id="kopf-offline">Offline</span></div>
     </div>
     <div class="rechts"><button class="rund" id="knopf-abmelden" type="button">Abmelden</button></div>
   </header>
   <main>
-    <section class="tab" id="tab-repos">
-      <div class="tab-kopf"><h2>Repos</h2><span class="tab-info" id="repos-info"></span></div>
-      <div class="chips" id="schueler-qr"></div>
-      <input class="suche" type="search" id="repos-suche" placeholder="Name, Beschreibung, Sprache, Thema …" autocomplete="off" autocapitalize="off">
-      <div class="chips" id="repos-filter"></div>
-      <div class="liste" id="repos-liste"></div>
+    <!-- Startseite -->
+    <section class="ansicht" id="ansicht-start">
+      <h2>Rechner</h2>
+      <div class="rechner" id="rechner"></div>
+      <h2>Bereiche</h2>
+      <div class="kacheln" id="kacheln"></div>
     </section>
-    <section class="tab versteckt" id="tab-praesentationen">
-      <div class="tab-kopf"><h2>Präsentationen</h2><span class="tab-info" id="praesentationen-info"></span></div>
-      <div class="karten" id="praesentationen-liste"></div>
+
+    <!-- Lerndashboards -->
+    <section class="ansicht versteckt" id="ansicht-lerndashboards">
+      <div class="bereich-kopf"><h2>Lerndashboards</h2><span class="bereich-info" id="info-lerndashboards"></span></div>
+      <input class="suche" type="search" data-fm="lerndashboards" placeholder="Modul, Klasse, Stunde, Thema …" autocomplete="off" autocapitalize="off">
+      <div class="chips" id="chips-lerndashboards"></div>
+      <div class="karten" id="liste-lerndashboards"></div>
+      <h3 id="kopf-lerndashboards-links">Öffentliche Lernseiten (ohne Passwort)</h3>
+      <div class="liste" id="liste-lerndashboards-links"></div>
     </section>
-    <section class="tab versteckt" id="tab-lerndashboards">
-      <div class="tab-kopf"><h2>Lerndashboards</h2><span class="tab-info" id="lerndashboards-info"></span></div>
-      <div class="karten" id="lerndashboards-liste"></div>
-      <section id="oeffentlich" class="versteckt">
-        <h3>Öffentliche Lernseiten (ohne Passwort)</h3>
-        <div class="liste" id="lerndashboards-links"></div>
-      </section>
+
+    <!-- Simulationen -->
+    <section class="ansicht versteckt" id="ansicht-simulationen">
+      <div class="bereich-kopf"><h2>Simulationen</h2><span class="bereich-info" id="info-simulationen"></span></div>
+      <input class="suche" type="search" data-fm="simulationen" placeholder="Titel, Klasse, Fach, Thema, Repo …" autocomplete="off" autocapitalize="off">
+      <div class="chips" id="chips-simulationen"></div>
+      <div class="chips klein" id="chips2-simulationen"></div>
+      <div class="liste" id="liste-simulationen"></div>
     </section>
-    <section class="tab versteckt" id="tab-simulationen">
-      <div class="tab-kopf"><h2>Simulationen</h2><span class="tab-info" id="simulationen-info"></span></div>
-      <div class="karten" id="simulationen-liste"></div>
-      <h3>Auf GitHub Pages (öffentlich)</h3>
-      <div class="liste" id="simulationen-github"></div>
+
+    <!-- Präsentationen -->
+    <section class="ansicht versteckt" id="ansicht-praesentationen">
+      <div class="bereich-kopf"><h2>Präsentationen</h2><span class="bereich-info" id="info-praesentationen"></span></div>
+      <input class="suche" type="search" data-fm="praesentationen" placeholder="Titel, Klasse, Thema …" autocomplete="off" autocapitalize="off">
+      <div class="chips" id="chips-praesentationen"></div>
+      <div class="karten" id="liste-praesentationen"></div>
     </section>
+
+    <!-- GitHub -->
+    <section class="ansicht versteckt" id="ansicht-repos">
+      <div class="bereich-kopf"><h2>GitHub</h2><span class="bereich-info" id="info-repos"></span></div>
+      <input class="suche" type="search" data-fm="repos" placeholder="Name, Beschreibung, Sprache, Thema …" autocomplete="off" autocapitalize="off">
+      <div class="chips" id="chips-repos"></div>
+      <div class="liste" id="liste-repos"></div>
+    </section>
+
     <p class="fuss" id="fuss">Alle Inhalte liegen nur als AES-256-Chiffrat auf GitHub Pages und werden erst hier nach der Anmeldung entschlüsselt.
       In Dashboards und Präsentationen: Wischen blättert, Tippen zeigt die Bedienleiste; <kbd>‹ Dashboard</kbd> führt hierher zurück.
       Angemeldet als <span id="fuss-wer"></span>.</p>
   </main>
-  <nav id="tabs">
-    <button type="button" data-tab="repos"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>Repos</button>
-    <button type="button" data-tab="praesentationen"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M10 8l5 2.5-5 2.5z"/></svg>Präsentationen</button>
-    <button type="button" data-tab="lerndashboards"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h7"/></svg>Lerndashboards</button>
-    <button type="button" data-tab="simulationen"><svg viewBox="0 0 24 24"><path d="M2 12h3l2-7 4 14 3-10 2 6 2-3h4"/></svg>Simulationen</button>
-  </nav>
 </div>
 
 <div id="qr" class="versteckt"><div class="qr-karte"><div class="qr-titel"></div><div class="qr-bild"></div><div class="qr-url"></div><div class="qr-hinweis">Tippen schließt</div></div></div>
@@ -233,21 +272,28 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
 const $ = s => document.querySelector(s);
 const SESSION_KEY = "dm_sitzung";
 const NAME_KEY = "dm_name";
-const TAB_KEY = "dm_tab";
 const ZIEL_KEY = "dm_ziel";
 const BASIS = new URL("./", location.href).href;                 // Adresse des Portals (Ordner, mit /)
 const STANDALONE = navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
 const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
 const WOCHENTAGE = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-const TABS = ["repos", "praesentationen", "lerndashboards", "simulationen"];
+const BEREICHE = ["lerndashboards", "simulationen", "praesentationen", "repos"];
+const KACHELN = {
+  lerndashboards: { name: "Lerndashboards", farbe: "var(--blau)", symbol: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h7"/></svg>' },
+  simulationen:   { name: "Simulationen",   farbe: "var(--tuerkis)", symbol: '<svg viewBox="0 0 24 24"><path d="M2 12h3l2-7 4 14 3-10 2 6 2-3h4"/></svg>' },
+  praesentationen:{ name: "Präsentationen", farbe: "var(--pink)", symbol: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M10 8l5 2.5-5 2.5z"/></svg>' },
+  repos:          { name: "GitHub",         farbe: "var(--grau)", symbol: '<svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>' },
+};
+const KLASSEN_MUSTER = [/DP ?[1-4] ?[A-Z]{2}/i, /\b[1-7] ?G[A-Z]{2,3} ?[A-Z]?\b/i, /Module ?[FM]\b/i];
+const FACH_MUSTER = [/ELTEC ?\d{1,2}/i, /MINT ?\d{1,2}/i, /DITEC ?\d{1,2}/i, /PRODI ?\d{1,2}/i, /ELETE/i, /TPELE/i, /OPXX ?\d?/i];
 
 let SESSION = null;            // {label, build, vaults:[{id,k,manifest}]}
 let MERKEN = false;
 let M = null;                  // entschlüsseltes Manifest
 let GEWUENSCHT = null;         // {id, hash, rel} aus ?d=… beim Start
-let TAB = "repos";
-let REPO_FILTER = "alle";
-let REPO_SUCHE = "";
+let ANSICHT = "start";
+const FM = { lerndashboards: {suche:"", klasse:"alle", fach:"alle"}, simulationen: {suche:"", klasse:"alle", fach:"alle"},
+             praesentationen: {suche:"", klasse:"alle", fach:"alle"}, repos: {suche:"", filter:"alle"} };
 const vaultKeys = new Map();
 const fensterListener = [];
 const timer = [];
@@ -259,6 +305,7 @@ function heuteIso(){ const d = new Date(); return `${d.getFullYear()}-${pad2(d.g
 function ausIso(s){ const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ""); return m ? new Date(+m[1], +m[2]-1, +m[3]) : null; }
 function fmtDatum(iso){ const d = ausIso(iso); return d ? `${WOCHENTAGE[d.getDay()]} ${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}` : ""; }
 function fmtTag(iso){ const d = ausIso(iso); return d ? `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}` : ""; }
+function fmtKurz(iso){ const d = ausIso(iso); return d ? `${WOCHENTAGE[d.getDay()]} ${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.` : ""; }
 function fmtStand(s){ const d = ausIso(s); if(!d) return ""; const m = /T(\d{2}):(\d{2})/.exec(s || ""); return `${fmtTag(s)}${m ? " " + m[1] + ":" + m[2] : ""}`; }
 function fmtMiB(b){ return b ? (b / 1048576).toFixed(1).replace(".", ",") + " MB" : ""; }
 const sichereListe = l => Array.isArray(l) ? l : [];
@@ -273,6 +320,9 @@ function ladenZeigen(text){ $("#laden-text").textContent = text || "Entschlüsse
 function ladenVerbergen(){ $("#laden").classList.add("versteckt"); }
 function lsLesen(k, standard){ try{ const v = localStorage.getItem(k); return v === null ? standard : v; }catch(e){ return standard; } }
 function lsSchreiben(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+function kuerzen(t, n){ t = String(t || ""); return t.length > n ? t.slice(0, n - 3).trimEnd() + " …" : t; }
+const normKlasse = s => String(s || "").replace(/\s+/g, "").toUpperCase();
+function ersteFundstelle(muster, text){ for(const m of muster){ const t = m.exec(text || ""); if(t) return normKlasse(t[0]); } return ""; }
 
 /* ─────────────────────────── Krypto (WebCrypto) ───────────────────────────
    Muss zu build.py passen: Passwort NFC + trim + Kleinschreibung → PBKDF2-SHA256 (600 000) →
@@ -350,12 +400,12 @@ async function ladeManifest(session){
   return m;
 }
 function bereich(name){ return sichereListe(M && M.bereiche && M.bereiche[name]); }
-function alleEintraege(){ return TABS.filter(t => t !== "repos").flatMap(bereich); }
+function alleEintraege(){ return ["lerndashboards", "praesentationen", "simulationen"].flatMap(bereich); }
 function findeEintrag(id){ return alleEintraege().find(e => e.id === id) || null; }
+function repos(){ return sichereListe(M && M.repos && M.repos.liste); }
+function rechner(){ return sichereListe(M && M.rechner); }
 
-/* ─────────────────────────── Service Worker: Tresor übergeben ───────────────────────────
-   Für mehrteilige Einträge liefert sw.js die Dateien unter d/<Kennung>/… entschlüsselt aus.
-   Dafür bekommt er den Tresor-Schlüssel und die Zuordnung Datei → Kennung. */
+/* ─────────────────────────── Service Worker: Tresor übergeben ─────────────────────────── */
 function dateiKarte(){
   const karte = {};
   for(const e of alleEintraege()){
@@ -386,7 +436,37 @@ function swVergessen(){
   try{ const c = navigator.serviceWorker && navigator.serviceWorker.controller; if(c) c.postMessage({typ:"vergessen"}); }catch(e){}
 }
 
-/* ─────────────────────────── Anzeige: Lerndashboards ─────────────────────────── */
+/* ─────────────────────────── Filemanager: Suche + Facetten ─────────────────────────── */
+function klassenVon(e){
+  const k = [];
+  for(const x of sichereListe(e.klassen)) if(x) k.push(normKlasse(x) === "ALLGEMEIN" ? "Allgemein" : normKlasse(x));
+  if(e.klasse) k.push(normKlasse(e.klasse));
+  return [...new Set(k.filter(Boolean))];
+}
+function fachVon(e){ return normKlasse(e.fach || e.modul || ""); }
+function suchtext(e){
+  return [e.titel, e.beschreibung, e.klasse, (e.klassen || []).join(" "), e.modul, e.fach, e.thema, e.einheit, e.jahr, e.datum,
+          e.meta && e.meta.modulname, e.name, e.sprache, (e.topics || []).join(" "),
+          ...sichereListe(e.stunden).map(s => `${s.nr} ${s.titel || ""} ${s.untertitel || ""}`)].filter(Boolean).join(" ").toLowerCase();
+}
+function fmPasst(e, st){
+  if(st.klasse !== "alle" && !klassenVon(e).includes(st.klasse)) return false;
+  if(st.fach !== "alle" && fachVon(e) !== st.fach) return false;
+  if(st.suche && !suchtext(e).includes(st.suche)) return false;
+  return true;
+}
+function chipsHtml(b, feld, werte, aktiv, alleText){
+  if(!werte.length) return "";
+  const chip = (wert, text, n) => `<button type="button" class="chip${aktiv === wert ? " an" : ""}" data-fm-chip="${esc(b)}" data-feld="${esc(feld)}" data-wert="${esc(wert)}">${esc(text)}${n != null ? ` <span class="n">${n}</span>` : ""}</button>`;
+  return chip("alle", alleText) + werte.map(w => chip(w.wert, w.text, w.n)).join("");
+}
+function zaehleWerte(eintraege, fn){
+  const z = new Map();
+  for(const e of eintraege) for(const w of fn(e)) z.set(w, (z.get(w) || 0) + 1);
+  return [...z.entries()].sort((a, b) => a[0].localeCompare(b[0], "de")).map(([wert, n]) => ({wert, text: wert, n}));
+}
+
+/* ─────────────────────────── Anzeige: Startseite ─────────────────────────── */
 function naechste(e){
   const heute = heuteIso();
   const st = sichereListe(e.stunden).filter(s => s && s.datum).slice().sort((a, b) => a.datum < b.datum ? -1 : a.datum > b.datum ? 1 : 0);
@@ -394,10 +474,34 @@ function naechste(e){
   const letzte = st.slice().reverse().find(s => s.datum < heute) || null;
   return { kommend, letzte, heute: !!(kommend && kommend.datum === heute) };
 }
+function renderStart(){
+  $("#rechner").innerHTML = rechner().map((r, i) => `<div class="r-kachel">
+      <div class="r-titel">${esc(r.titel)}</div>
+      <div class="r-adresse">${esc(String(r.adresse).replace(/^https?:\/\//, ""))}</div>
+      <div class="r-knoepfe"><a class="primaer" href="${esc(r.adresse)}" target="_blank" rel="noopener">Öffnen ↗</a>${r.qr ? `<button type="button" data-qr-rechner="${i}">QR</button>` : ""}</div>
+    </div>`).join("") || `<div class="leer">Keine Rechner eingetragen (zugangsdaten.json → rechner).</div>`;
+  const ld = bereich("lerndashboards").filter(e => e.typ === "tresor");
+  const ldLinks = bereich("lerndashboards").filter(e => e.typ === "link");
+  const kommend = ld.map(e => ({e, n: naechste(e).kommend})).filter(x => x.n).sort((a, b) => a.n.datum < b.n.datum ? -1 : 1)[0];
+  const sim = bereich("simulationen").filter(e => e.typ === "tresor");
+  const simGh = repos().filter(r => r.simulation && !r.archiviert);
+  const pr = bereich("praesentationen").filter(e => e.typ === "tresor");
+  const folien = pr.reduce((s, e) => s + (e.folien || 0), 0);
+  const alle = repos();
+  const unter = {
+    lerndashboards: `${ld.length} im Tresor${ldLinks.length ? ` · ${ldLinks.length} Lernseiten` : ""}${kommend ? `<br>Nächste Stunde ${esc(fmtKurz(kommend.n.datum))} · ${esc(kommend.e.modul || kommend.e.titel)}` : ""}`,
+    simulationen: `${sim.length} lokal · ${simGh.length} auf GitHub Pages`,
+    praesentationen: `${pr.length} im Tresor${folien ? ` · ${folien} Folien` : ""}`,
+    repos: alle.length ? `${alle.length} Repos · ${alle.filter(r => r.privat).length} privat · ${alle.filter(r => r.pages).length} Webseiten` : "Repo-Liste fehlt",
+  };
+  $("#kacheln").innerHTML = BEREICHE.map(b => `<button type="button" class="kachel" data-ansicht="${b}" style="--kf:${KACHELN[b].farbe}">
+      <span class="k-symbol">${KACHELN[b].symbol}</span><span class="k-name">${esc(KACHELN[b].name)}</span><span class="k-unter">${unter[b]}</span><span class="k-pfeil">›</span></button>`).join("");
+}
+
+/* ─────────────────────────── Anzeige: Lerndashboards ─────────────────────────── */
 function einheitName(e){ return (e.meta && e.meta.einheit) || "Stunde"; }
 function mehrzahl(einheit, n){ const m = {Stunde:"Stunden", Teil:"Teile", Lektion:"Lektionen", Kapitel:"Kapitel", Woche:"Wochen"}[einheit] || einheit + "n"; return `${n} ${m}`; }
 function naechsteBezeichnung(einheit){ return ({Stunde:"Nächste Stunde", Teil:"Nächster Teil", Lektion:"Nächste Lektion", Kapitel:"Nächstes Kapitel", Woche:"Nächste Woche"})[einheit] || "Nächste " + einheit; }
-function kuerzen(t, n){ t = String(t || ""); return t.length > n ? t.slice(0, n - 3).trimEnd() + " …" : t; }
 function karteLerndashboard(e){
   const meta = e.meta || {};
   const einheit = einheitName(e);
@@ -432,8 +536,62 @@ function linkHtml(e){
   return `<a class="link" href="${esc(e.url)}" target="_blank" rel="noopener"><span class="punkt" style="background:${esc(farbe)}"></span>
     <span><div class="l-titel">${esc(e.titel)}</div><div class="l-meta">${esc(meta)}</div></span><span class="pfeil">↗</span></a>`;
 }
+function renderLerndashboards(){
+  const st = FM.lerndashboards;
+  const alle = bereich("lerndashboards");
+  $("#chips-lerndashboards").innerHTML = chipsHtml("lerndashboards", "klasse", zaehleWerte(alle, klassenVon), st.klasse, "Alle Klassen");
+  const tresor = alle.filter(e => e.typ === "tresor" && fmPasst(e, st));
+  const links = alle.filter(e => e.typ === "link" && fmPasst(e, st));
+  $("#liste-lerndashboards").innerHTML = tresor.length ? tresor.map(karteLerndashboard).join("") : `<div class="leer">Kein Lerndashboard passt zu Suche und Filter.</div>`;
+  $("#liste-lerndashboards-links").innerHTML = links.map(linkHtml).join("");
+  $("#kopf-lerndashboards-links").classList.toggle("versteckt", !links.length);
+  $("#info-lerndashboards").textContent = `${alle.filter(e => e.typ === "tresor").length} im Tresor · ${alle.filter(e => e.typ === "link").length} öffentlich`;
+}
 
-/* ─────────────────────────── Anzeige: Präsentationen & Simulationen ─────────────────────────── */
+/* ─────────────────────────── Anzeige: Simulationen ─────────────────────────── */
+function repoAlsSimulation(r){
+  const text = `${r.name} ${sichereListe(r.topics).join(" ")} ${r.beschreibung || ""}`;
+  return { typ:"repo", id:"@" + r.name, titel:r.name, beschreibung:r.beschreibung || "", klasse:ersteFundstelle(KLASSEN_MUSTER, text),
+           fach:ersteFundstelle(FACH_MUSTER, text), url:r.pages, name:r.name, topics:r.topics, sprache:r.sprache, gepusht:r.gepusht, qr:r.qr };
+}
+function zeileSimulation(e){
+  const bereit = !!(e.start && e.dateien && e.dateien[e.start]);
+  const dateien = Object.keys(e.dateien || {}).length;
+  const meta = [e.einheit, e.datum ? fmtTag(e.datum) : "", e.mehrteilig ? `${dateien} Dateien` : "", e.groesse ? fmtMiB(e.groesse) : ""].filter(Boolean).join(" · ");
+  return `<div class="zeile"><span class="punkt" style="background:${esc(e.farbe || "#14b8a6")}"></span>
+    <span class="z-mitte"><div class="z-titel">${esc(e.titel)}</div><div class="z-meta">${esc(meta || e.beschreibung || "")}</div>${!bereit ? `<div class="z-meta" style="color:var(--gelb)">Nicht im Tresor: ${esc(e.hinweis || "Datei fehlt")}</div>` : ""}</span>
+    <span class="z-knoepfe">${bereit ? `<button type="button" class="primaer" data-oeffnen="${esc(e.id)}">Öffnen</button>` : ""}</span></div>`;
+}
+function zeileRepoSimulation(e){
+  const meta = [e.klasse, e.fach, e.gepusht ? "zuletzt " + fmtTag(e.gepusht) : ""].filter(Boolean).join(" · ");
+  return `<div class="zeile"><span class="punkt" style="background:var(--tuerkis)"></span>
+    <span class="z-mitte"><div class="z-titel">${esc(e.name)}</div><div class="z-meta">${esc(kuerzen(e.beschreibung || meta, 120))}</div></span>
+    <span class="z-knoepfe"><a class="primaer" href="${esc(e.url)}" target="_blank" rel="noopener">Öffnen ↗</a>${e.qr ? `<button type="button" data-qr="${esc(e.name)}">QR</button>` : ""}</span></div>`;
+}
+function renderSimulationen(){
+  const st = FM.simulationen;
+  const lokal = bereich("simulationen").filter(e => e.typ === "tresor");
+  const gh = repos().filter(r => r.simulation && !r.archiviert).map(repoAlsSimulation);
+  const alle = lokal.concat(gh);
+  $("#chips-simulationen").innerHTML = chipsHtml("simulationen", "klasse", zaehleWerte(alle, klassenVon), st.klasse, "Alle Klassen");
+  const faecher = zaehleWerte(alle.filter(e => st.klasse === "alle" || klassenVon(e).includes(st.klasse)), e => fachVon(e) ? [fachVon(e)] : []);
+  $("#chips2-simulationen").innerHTML = faecher.length > 1 ? chipsHtml("simulationen", "fach", faecher, st.fach, "Alle Fächer") : "";
+  const lokalT = lokal.filter(e => fmPasst(e, st));
+  const ghT = gh.filter(e => fmPasst(e, st));
+  let html = "";
+  const gruppen = new Map();
+  for(const e of lokalT){
+    const k = [e.klasse, e.fach, e.thema].filter(Boolean).join(" · ") || "OneDrive";
+    if(!gruppen.has(k)) gruppen.set(k, []);
+    gruppen.get(k).push(e);
+  }
+  for(const [k, liste] of gruppen) html += `<div class="gruppe">${esc(k)}</div>` + liste.map(zeileSimulation).join("");
+  if(ghT.length) html += `<div class="gruppe">GitHub Pages (öffentlich)</div>` + ghT.map(zeileRepoSimulation).join("");
+  $("#liste-simulationen").innerHTML = html || `<div class="leer">Keine Simulation passt zu Suche und Filter.</div>`;
+  $("#info-simulationen").textContent = `${lokal.length} lokal · ${gh.length} auf GitHub Pages`;
+}
+
+/* ─────────────────────────── Anzeige: Präsentationen ─────────────────────────── */
 function kartePraesentation(e){
   const bereit = !!(e.start && e.dateien && e.dateien[e.start]);
   const klassen = sichereListe(e.klassen).map(k => { const m = e.module && e.module[k]; return m ? `${k} · ${m}` : k; }).join(" · ");
@@ -447,32 +605,27 @@ function kartePraesentation(e){
     <div class="k-fuss">${e.groesse ? `<span>${esc(fmtMiB(e.groesse))}</span>` : ""}${e.geaendert ? `<span>Stand ${esc(fmtStand(e.geaendert))}</span>` : ""}</div>
   </article>`;
 }
-function karteSimulation(e){
-  const bereit = !!(e.start && e.dateien && e.dateien[e.start]);
-  const zeile = [e.klasse, e.fach, e.thema, e.einheit, e.jahr ? e.jahr.replace("-", " – ") : ""].filter(Boolean).join(" · ");
-  const dateien = Object.keys(e.dateien || {}).length;
-  return `<article class="karte" style="--acc:${esc(e.farbe || "#14b8a6")}">
-    <div class="k-titel">${esc(e.titel)}</div>
-    <div class="k-meta">${esc(zeile)}</div>
-    ${e.beschreibung ? `<div class="k-text">${esc(kuerzen(e.beschreibung, 220))}</div>` : ""}
-    ${!bereit ? `<div class="k-text" style="color:var(--gelb)">Nicht im Tresor: ${esc(e.hinweis || "Datei fehlt")}</div>` : ""}
-    <div class="k-knoepfe">${bereit ? `<button type="button" class="primaer" data-oeffnen="${esc(e.id)}">Öffnen</button>` : ""}</div>
-    <div class="k-fuss">${e.datum ? `<span>${esc(fmtTag(e.datum))}</span>` : ""}${e.mehrteilig ? `<span>${dateien} Dateien</span>` : ""}${e.groesse ? `<span>${esc(fmtMiB(e.groesse))}</span>` : ""}</div>
-  </article>`;
+function renderPraesentationen(){
+  const st = FM.praesentationen;
+  const alle = bereich("praesentationen").filter(e => e.typ === "tresor");
+  $("#chips-praesentationen").innerHTML = chipsHtml("praesentationen", "klasse", zaehleWerte(alle, klassenVon), st.klasse, "Alle Klassen");
+  const liste = alle.filter(e => fmPasst(e, st));
+  $("#liste-praesentationen").innerHTML = liste.length ? liste.map(kartePraesentation).join("") : `<div class="leer">Keine Präsentation passt zu Suche und Filter.</div>`;
+  $("#info-praesentationen").textContent = `${alle.length} im Tresor`;
 }
 
-/* ─────────────────────────── Anzeige: Repos ─────────────────────────── */
-function repos(){ return sichereListe(M && M.repos && M.repos.liste); }
+/* ─────────────────────────── Anzeige: GitHub ─────────────────────────── */
 function repoPasst(r){
-  if(REPO_FILTER === "webseite" && !r.pages) return false;
-  if(REPO_FILTER === "simulationen" && !r.simulation) return false;
-  if(REPO_FILTER === "portale" && !r.portal) return false;
-  if(REPO_FILTER === "privat" && !r.privat) return false;
-  if(REPO_FILTER === "archiv" && !r.archiviert) return false;
-  if(REPO_FILTER !== "archiv" && r.archiviert) return false;
-  if(REPO_SUCHE){
+  const st = FM.repos;
+  if(st.filter === "webseite" && !r.pages) return false;
+  if(st.filter === "simulationen" && !r.simulation) return false;
+  if(st.filter === "portale" && !r.portal) return false;
+  if(st.filter === "privat" && !r.privat) return false;
+  if(st.filter === "archiv" && !r.archiviert) return false;
+  if(st.filter !== "archiv" && r.archiviert) return false;
+  if(st.suche){
     const t = [r.name, r.beschreibung, r.sprache, sichereListe(r.topics).join(" ")].join(" ").toLowerCase();
-    if(!t.includes(REPO_SUCHE)) return false;
+    if(!t.includes(st.suche)) return false;
   }
   return true;
 }
@@ -497,55 +650,34 @@ function repoHtml(r){
   </div>`;
 }
 function renderRepos(){
+  const st = FM.repos;
   const alle = repos();
-  const zaehle = f => { const alt = REPO_FILTER; REPO_FILTER = f; const n = alle.filter(repoPasst).length; REPO_FILTER = alt; return n; };
+  const zaehle = f => { const alt = st.filter; st.filter = f; const n = alle.filter(repoPasst).length; st.filter = alt; return n; };
   const chips = [["alle", "Alle"], ["webseite", "Webseite"], ["simulationen", "Simulationen"], ["portale", "Portale"], ["privat", "Privat"], ["archiv", "Archiv"]];
-  $("#repos-filter").innerHTML = chips.map(([k, t]) => `<button type="button" class="chip${REPO_FILTER === k ? " an" : ""}" data-filter="${k}">${t} <span class="n">${zaehle(k)}</span></button>`).join("");
+  $("#chips-repos").innerHTML = chips.map(([k, t]) => `<button type="button" class="chip${st.filter === k ? " an" : ""}" data-fm-chip="repos" data-feld="filter" data-wert="${k}">${t} <span class="n">${zaehle(k)}</span></button>`).join("");
   const liste = alle.filter(repoPasst);
-  $("#repos-liste").innerHTML = liste.length ? liste.map(repoHtml).join("") : `<div class="leer">Kein Repo passt zu Suche und Filter.</div>`;
-  const privat = alle.filter(r => r.privat).length, seiten = alle.filter(r => r.pages).length;
+  $("#liste-repos").innerHTML = liste.length ? liste.map(repoHtml).join("") : `<div class="leer">Kein Repo passt zu Suche und Filter.</div>`;
   const R = M.repos || {};
-  $("#repos-info").textContent = alle.length ? `${alle.length} Repos · ${privat} privat · ${seiten} mit Webseite · Stand ${fmtStand(R.stand)}${R.fehler ? " · ⚠︎ " + R.fehler : ""}` : (R.fehler ? "⚠︎ " + R.fehler : "keine Repos im Tresor");
-  const apps = sichereListe(R.schueler_apps);
-  $("#schueler-qr").innerHTML = apps.map((a, i) => `<button type="button" class="chip qr" data-qr-app="${i}">QR · ${esc(a.titel)}</button>`).join("");
+  $("#info-repos").textContent = alle.length ? `${alle.length} Repos · ${alle.filter(r => r.privat).length} privat · ${alle.filter(r => r.pages).length} mit Webseite · Stand ${fmtStand(R.stand)}${R.fehler ? " · ⚠︎ " + R.fehler : ""}` : (R.fehler ? "⚠︎ " + R.fehler : "keine Repos im Tresor");
 }
-function renderLerndashboards(){
-  const eintraege = bereich("lerndashboards");
-  const tresor = eintraege.filter(e => e.typ === "tresor");
-  const links = eintraege.filter(e => e.typ === "link");
-  $("#lerndashboards-liste").innerHTML = tresor.length ? tresor.map(karteLerndashboard).join("") : `<div class="leer">Noch kein Lerndashboard im Tresor.</div>`;
-  $("#lerndashboards-links").innerHTML = links.map(linkHtml).join("");
-  $("#oeffentlich").classList.toggle("versteckt", !links.length);
-  $("#lerndashboards-info").textContent = `${tresor.length} im Tresor${links.length ? ` · ${links.length} öffentlich` : ""}`;
-}
-function renderPraesentationen(){
-  const liste = bereich("praesentationen").filter(e => e.typ === "tresor");
-  $("#praesentationen-liste").innerHTML = liste.length ? liste.map(kartePraesentation).join("") : `<div class="leer">Noch keine Präsentation im Tresor.</div>`;
-  $("#praesentationen-info").textContent = `${liste.length} im Tresor`;
-}
-function renderSimulationen(){
-  const liste = bereich("simulationen").filter(e => e.typ === "tresor");
-  $("#simulationen-liste").innerHTML = liste.length ? liste.map(karteSimulation).join("") : `<div class="leer">Keine lokale Simulation im Tresor.</div>`;
-  const gh = repos().filter(r => r.simulation && !r.archiviert);
-  $("#simulationen-github").innerHTML = gh.length ? gh.map(r => `<div class="link"><span class="punkt" style="background:var(--tuerkis)"></span>
-      <span style="min-width:0"><div class="l-titel">${esc(r.name)}</div><div class="l-meta">${esc(kuerzen(r.beschreibung || "", 140))}</div></span>
-      <span class="pfeil" style="display:flex;gap:6px"><a class="chip" href="${esc(r.pages)}" target="_blank" rel="noopener">Öffnen ↗</a>${r.qr ? `<button type="button" class="chip" data-qr="${esc(r.name)}">QR</button>` : ""}</span></div>`).join("")
-    : `<div class="leer">Keine Repos mit Webseite.</div>`;
-  $("#simulationen-info").textContent = `${liste.length} lokal · ${gh.length} auf GitHub Pages`;
-}
+
+/* ─────────────────────────── Ansichten ─────────────────────────── */
 function render(){
   $("#kopf-schuljahr").textContent = M.schuljahr || "";
   $("#kopf-stand").textContent = M.erstellt ? "Stand " + fmtStand(M.erstellt) : "";
   $("#fuss-wer").textContent = (SESSION && SESSION.label) || "Leser";
   $("#kopf-offline").classList.toggle("versteckt", navigator.onLine !== false);
-  renderRepos(); renderPraesentationen(); renderLerndashboards(); renderSimulationen();
-  tabZeigen(TAB);
+  renderStart(); renderLerndashboards(); renderSimulationen(); renderPraesentationen(); renderRepos();
+  ansichtZeigen(ANSICHT);
 }
-function tabZeigen(name){
-  if(!TABS.includes(name)) name = "repos";
-  TAB = name; lsSchreiben(TAB_KEY, name);
-  for(const t of TABS) $("#tab-" + t).classList.toggle("versteckt", t !== name);
-  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("an", b.dataset.tab === name));
+function ansichtZeigen(name){
+  if(name !== "start" && !BEREICHE.includes(name)) name = "start";
+  ANSICHT = name;
+  for(const a of ["start", ...BEREICHE]) $("#ansicht-" + a).classList.toggle("versteckt", a !== name);
+  $("#knopf-start").classList.toggle("versteckt", name === "start");
+  $("#kopf-bild").classList.toggle("versteckt", name !== "start");
+  $("#kopf-titel").textContent = name === "start" ? "Dashboard" : KACHELN[name].name;
+  window.scrollTo(0, 0);
 }
 function appZeigen(){
   $("#anmeldung").classList.add("versteckt");
@@ -638,7 +770,6 @@ async function oeffnen(id, hash, rel){
     if(e.mehrteilig || rel){
       const sw = await tresorAnSW();
       if(sw === "ungesteuert"){
-        // Erster Besuch / Neuladen ohne Steuerung: einmal neu laden, danach führt der Worker die Adresse aus.
         try{ sessionStorage.setItem(ZIEL_KEY, JSON.stringify({id, hash: hash || "", rel: rel || ""})); }catch(err){}
         location.reload();
         return;
@@ -698,19 +829,26 @@ $("#login-form").addEventListener("submit", async ev => {
     loginStatus(istNetzfehler(e) ? "Keine Verbindung zum Portal." : "Fehler: " + (e.message || e), true);
   }finally{ knopf.disabled = false; }
 });
+const renderer = { lerndashboards: renderLerndashboards, simulationen: renderSimulationen, praesentationen: renderPraesentationen, repos: renderRepos };
 $("#app").addEventListener("click", ev => {
   const b = ev.target.closest("button[data-oeffnen]");
   if(b){ oeffnen(b.dataset.oeffnen, b.dataset.hash || "", ""); return; }
+  const k = ev.target.closest("[data-ansicht]");
+  if(k){ ansichtZeigen(k.dataset.ansicht); return; }
+  if(ev.target.closest("#knopf-start")){ ansichtZeigen("start"); return; }
   const q = ev.target.closest("[data-qr]");
   if(q){ const r = repos().find(x => x.name === q.dataset.qr); if(r) qrZeigen(r.name, r.pages, r.qr); return; }
-  const qa = ev.target.closest("[data-qr-app]");
-  if(qa){ const a = sichereListe(M.repos && M.repos.schueler_apps)[+qa.dataset.qrApp]; if(a) qrZeigen(a.titel, a.adresse, a.qr); return; }
-  const f = ev.target.closest("button[data-filter]");
-  if(f){ REPO_FILTER = f.dataset.filter; renderRepos(); return; }
-  const t = ev.target.closest("#tabs button[data-tab]");
-  if(t){ tabZeigen(t.dataset.tab); window.scrollTo(0, 0); return; }
+  const qr = ev.target.closest("[data-qr-rechner]");
+  if(qr){ const a = rechner()[+qr.dataset.qrRechner]; if(a) qrZeigen(a.titel, a.adresse, a.qr); return; }
+  const c = ev.target.closest("button[data-fm-chip]");
+  if(c){ const st = FM[c.dataset.fmChip]; st[c.dataset.feld] = c.dataset.wert; if(c.dataset.feld === "klasse") st.fach = "alle"; renderer[c.dataset.fmChip](); return; }
 });
-$("#repos-suche").addEventListener("input", ev => { REPO_SUCHE = ev.target.value.trim().toLowerCase(); renderRepos(); });
+$("#app").addEventListener("input", ev => {
+  const s = ev.target.closest("input[data-fm]");
+  if(!s) return;
+  FM[s.dataset.fm].suche = s.value.trim().toLowerCase();
+  renderer[s.dataset.fm]();
+});
 $("#qr").addEventListener("click", () => $("#qr").classList.add("versteckt"));
 $("#knopf-abmelden").addEventListener("click", () => {
   swVergessen();
@@ -723,6 +861,7 @@ $("#knopf-abmelden").addEventListener("click", () => {
 async function start(){
   const p = new URLSearchParams(location.search);
   if(p.get("d")) GEWUENSCHT = { id: p.get("d"), hash: location.hash || "", rel: p.get("r") || "" };
+  if(p.get("b") && BEREICHE.includes(p.get("b"))) ANSICHT = p.get("b");
   try{ const z = sessionStorage.getItem(ZIEL_KEY); if(z){ sessionStorage.removeItem(ZIEL_KEY); GEWUENSCHT = JSON.parse(z); } }catch(e){}
   if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(e => console.warn("Service Worker:", e)); }
   fensterHoeren("online", () => $("#kopf-offline").classList.add("versteckt"));
@@ -730,7 +869,6 @@ async function start(){
   $("#login-name").value = lsLesen(NAME_KEY, "Tom");
   $("#login-merken").checked = STANDALONE;
   $("#login-tipp").classList.toggle("versteckt", !(IOS && !STANDALONE));
-  TAB = lsLesen(TAB_KEY, "repos");
 
   const gespeichert = sitzungLesen();
   if(gespeichert && gespeichert.s && Array.isArray(gespeichert.s.vaults) && gespeichert.s.vaults.length){
@@ -749,7 +887,6 @@ async function start(){
         console.warn("Sitzung konnte nicht geladen werden:", e);
         loginZeigen("Keine Verbindung – bitte später erneut versuchen.", true);
       } else {
-        // Tresor neu verschlüsselt oder Passwort geändert: alte Sitzung ist wertlos.
         sitzungVerwerfen(); swVergessen();
         loginZeigen("Der Tresor wurde neu verschlüsselt – bitte neu anmelden.", true);
       }

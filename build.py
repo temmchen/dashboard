@@ -27,6 +27,7 @@ Was aufgenommen wird (`quellen` in zugangsdaten.json):
     kommt ihr ganzer Ordner mit – der Service Worker der Seite liefert ihn entschlüsselt aus.
   * Repos: `gh api user/repos` (alle eigenen, auch private), Pages-Adresse nach Konvention
     https://<benutzer>.github.io/<repo>/, QR-Code als Modulraster.
+  * Rechner (`rechner` in zugangsdaten.json): die Schnellknöpfe oben auf der Startseite, mit QR.
 
 Krypto-Design (muss zu docs/index.html und docs/sw.js passen — wie Journal Mobil,
 Schuljahr- und CdM-Portal):
@@ -500,8 +501,18 @@ def sammle_repos(cfg_repos: dict, alt: dict, ohne_abfrage: bool):
 
 
 def schueler_apps(cfg_repos: dict):
+    """Ältere Konfiguration (repos.schueler_apps); die Startseite zeigt heute `rechner`."""
     aus = []
     for a in cfg_repos.get("schueler_apps") or []:
+        if isinstance(a, dict) and a.get("adresse"):
+            aus.append({"titel": a.get("titel") or a["adresse"], "adresse": a["adresse"], "qr": qr_raster(a["adresse"])})
+    return aus
+
+
+def rechner_liste(cfg: dict):
+    """Die Rechner oben auf der Startseite (zugangsdaten.json → `rechner`: [{titel, adresse}])."""
+    aus = []
+    for a in cfg.get("rechner") or []:
         if isinstance(a, dict) and a.get("adresse"):
             aus.append({"titel": a.get("titel") or a["adresse"], "adresse": a["adresse"], "qr": qr_raster(a["adresse"])})
     return aus
@@ -612,6 +623,7 @@ def main():
     repos = sammle_repos(cfg.get("repos") or {}, alt.get("repos") or {}, args.ohne_repos)
     neu["repos"] = {k: v for k, v in repos.items() if k != "schueler_apps"}
     manifest["repos"] = repos
+    manifest["rechner"] = rechner_liste(cfg)
 
     vdir = VAULTS / vid
     (vdir / "f").mkdir(parents=True, exist_ok=True)

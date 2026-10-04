@@ -16,13 +16,12 @@
   "repos": {
     "benutzer": "temmchen",
     "portale": ["journal-mobil", "schuljahr-portal", "CdM", "kilometerrechner", "pfa", "dashboard", "repo-uebersicht"],
-    "keine_simulation": ["repo-uebersicht", "trafic_info"],
-    "schueler_apps": [
-      { "titel": "fx-991DE X Trainer", "adresse": "https://temmchen.github.io/fx991/" },
-      { "titel": "RPN42 · Tom Bleyer", "adresse": "https://temmchen.github.io/rpn42/" },
-      { "titel": "Potentialdiagramm", "adresse": "https://temmchen.github.io/diagramme-potentiel/" }
-    ]
+    "keine_simulation": ["repo-uebersicht", "trafic_info"]
   },
+  "rechner": [
+    { "titel": "fx-991DE X Trainer", "adresse": "https://temmchen.github.io/fx991/" },
+    { "titel": "RPN42 · Tom Bleyer", "adresse": "https://temmchen.github.io/rpn42/" }
+  ],
   "zugaenge": [
     { "name": "Tom", "passwort": "HIER-PASSWORT-4-GRUPPEN" }
   ]

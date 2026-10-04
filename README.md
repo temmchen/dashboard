@@ -11,14 +11,19 @@ Im Repo steht kein Passwort und kein Klartext.
   (`?d=` Kennung des Eintrags, `#…` Anker des Dashboards bzw. der Präsentation)
 - Anleitung für den Alltag und Passwort: `KI/Dashboard Mobil/README.md` bzw. `KI/Passwoerter/` in OneDrive
 
-## Die vier Bereiche
+## Startseite und die vier Bereiche
 
-| Reiter | Quelle | Was die App zeigt |
+Nach der Anmeldung zeigt die **Startseite** oben die **Rechner** (`rechner` in zugangsdaten.json, z. B. fx-991DE X
+Trainer und RPN42: „Öffnen“ und QR-Code) und darunter vier **Kacheln** wie in Dashboard Pro. Jeder Bereich hat
+oben eine **Suche** und **Filter-Chips** (Klasse, bei Simulationen zusätzlich Fach) wie die Filemanager am Mac;
+„‹ Start“ führt zurück zur Startseite. Verknüpfung direkt in einen Bereich: `…/dashboard/?b=simulationen`.
+
+| Kachel | Quelle | Was die App zeigt |
 | --- | --- | --- |
-| **Repos** | `gh api user/repos` beim Bauen (alle eigenen Repos, auch private) | Liste mit Suche und Filtern (Webseite · Simulationen · Portale · Privat · Archiv), Knöpfe „Seite öffnen“, „GitHub“, **QR-Code** bildschirmfüllend (für den Beamer), oben die Schüler-Apps als QR |
-| **Präsentationen** | `KI/Keynotes/<Ordner>/*.html` (eine Datei, Filme eingebaut) | Karten mit Klassen, Folien- und Filmzahl; öffnen = Präsentation im Vollbild mit Touch-Leiste (‹ › · Übersicht · Auflösung · Vollbild) |
 | **Lerndashboards** | `KI/Lerndashboards/<Ordner>/*.html`; Ordner mit `github.json` + `pages` nur als Link | Karten mit nächster Stunde und „Stunde N starten“; Kompendium und Oszilloskop als öffentliche Links |
-| **Simulationen** | `KI/Simulations/Jahr/Klasse/Fach/…/*.html` (ohne `_`-Seiten, build/, Quellcode/) | lokale Simulationen (Klasse · Fach · Thema · Einheit) und darunter die öffentlichen Simulations-Repos mit QR |
+| **Simulationen** | `KI/Simulations/Jahr/Klasse/Fach/…/*.html` (ohne `_`-Seiten, build/, Quellcode/) und die öffentlichen Simulations-Repos | Zeilen gruppiert nach Klasse · Fach · Thema, darunter „GitHub Pages“ (Klasse und Fach aus Repo-Name und Topics) mit QR |
+| **Präsentationen** | `KI/Keynotes/<Ordner>/*.html` (eine Datei, Filme eingebaut) | Karten mit Klassen, Folien- und Filmzahl; öffnen = Präsentation im Vollbild mit Touch-Leiste (‹ › · Übersicht · Auflösung · Vollbild) |
+| **GitHub** | `gh api user/repos` beim Bauen (alle eigenen Repos, auch private) | Liste mit Suche und Filtern (Webseite · Simulationen · Portale · Privat · Archiv), Knöpfe „Seite öffnen“, „GitHub“, **QR-Code** bildschirmfüllend (für den Beamer) |
 
 Verweist eine Simulation auf Dateien neben sich (css/, js/ …), kommt ihr ganzer Ordner verschlüsselt mit; der
 Service Worker liefert ihn unter `d/<Kennung>/…` entschlüsselt aus. Alle anderen Einträge sind eine
@@ -69,7 +74,7 @@ dashboard/
 │   ├── pruefen.py              Prüflauf in headless Chrome (iPhone, iPhone quer, iPad, Mac) mit Prüfbildern
 │   └── symbole.py              zeichnet die App-Symbole (PNG) neu
 └── docs/                       GitHub-Pages-Wurzel
-    ├── index.html              Web-App: Anmeldung, vier Reiter, Entschlüsseln, Übergabe an Dashboard/Präsentation
+    ├── index.html              Web-App: Anmeldung, Startseite (Rechner, Kacheln), vier Bereiche mit Suche/Filtern, Entschlüsseln, Übergabe
     ├── sw.js                   Service Worker: App-Hülle + Tresordateien offline, d/<Kennung>/… entschlüsselt ausliefern
     ├── manifest.webmanifest, icons/
     └── vaults/                 index.json (Salts, eingewickelte Schlüssel) + <id>/m.enc + <id>/f/<id>.enc
@@ -84,8 +89,9 @@ mit „angemeldet bleiben“ merkt er ihn in IndexedDB (sonst nur im Speicher �
 leitet `d/…` zur Anmeldung um und danach wieder zurück).
 
 Prüfen: `/usr/bin/python3 werkzeuge/pruefen.py [--geraet iphone|ipad|mac|alle] [--url …]` (Anmeldung
-falsch/richtig, Repos mit Suche/Filter/QR, Präsentation mit Touch-Leiste, Lerndashboard mit
-Verknüpfung `?d=…#/2/1`, mehrteilige Simulation über den Service Worker, Rückwege, Abmelden; Prüfbilder in `Pruefbilder/`).
+falsch/richtig, Startseite mit Rechnern und Kacheln, GitHub mit Suche/Filter/QR, Präsentation mit Touch-Leiste,
+Lerndashboard mit Suche und Verknüpfung `?d=…#/2/1`, Simulationen mit Klassen-Filter und mehrteiliger Simulation über
+den Service Worker, Rückwege, Abmelden; Prüfbilder in `Pruefbilder/`).
 
 Lokal ansehen: `cd docs && /usr/bin/python3 -m http.server 8427 --bind 127.0.0.1` → http://127.0.0.1:8427/
 (Direktes Öffnen der Datei per Doppelklick funktioniert nicht — `fetch()` und der Service Worker brauchen
