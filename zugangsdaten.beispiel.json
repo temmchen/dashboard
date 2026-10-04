@@ -1,0 +1,15 @@
+{
+  "portal": "Lerndashboards",
+  "url": "https://temmchen.github.io/lerndashboards/",
+  "repo": "https://github.com/temmchen/lerndashboards.git",
+  "schuljahr": "2026 – 2027",
+  "quelle": "/Users/tbr/Library/CloudStorage/OneDrive-365education/KI/Lerndashboards",
+  "werkzeuge": "/Users/tbr/Library/CloudStorage/OneDrive-365education/KI/Lerndashboards Mobil",
+  "optionen": {
+    "max_mb_je_datei": 40,
+    "ausschliessen": []
+  },
+  "zugaenge": [
+    { "name": "Tom", "passwort": "HIER-PASSWORT-4-GRUPPEN" }
+  ]
+}

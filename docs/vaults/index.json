@@ -1,0 +1,31 @@
+{
+ "v": 1,
+ "portal": "lerndashboards",
+ "schuljahr": "2026 – 2027",
+ "erstellt": "2026-10-04T04:29:24",
+ "build": "6a29c0ad96d5",
+ "kdf": {
+  "typ": "PBKDF2-SHA256",
+  "iter": 600000,
+  "normalisierung": "nfc+trim+lower"
+ },
+ "principals": [
+  {
+   "id": "p0",
+   "salt": "bGHpZDJMbP3F195Bu7N4Ag=="
+  }
+ ],
+ "vaults": [
+  {
+   "id": "b6ba2a86af72d9b8",
+   "wraps": [
+    {
+     "iv": "GJLVaErHjKwS2JWd",
+     "ct": "/l22tec/tCKEfqD/RgkHiolArcb6rGtJFjZTzgt23mOTeWzzrRJ7Ocr6zfJcU073+KXa5feGeB/do1730TShI4T+3mXwICpNnxY7bJcH8CHw2e+JM3g+kjbRKzvPV21JzG6FTyBtdA==",
+     "p": "p0"
+    }
+   ],
+   "manifest": "vaults/b6ba2a86af72d9b8/m.enc"
+  }
+ ]
+}

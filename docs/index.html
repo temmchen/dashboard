@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#070a12">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lerndashboards">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<title>Lerndashboards · Tom Bleyer</title>
+<style>
+/* ═══════════════════════ Farben & Grundlagen ═══════════════════════
+   Dunkel wie die Lerndashboards selbst (Hintergrund #070a12, Akzent Cyan). */
+:root{
+  --bg:#070a12; --card:#0c111d; --card2:#121a2b; --line:#1f2738; --line2:#2a3449;
+  --tx:#e8edf5; --tx2:#aab4c6; --tx3:#6b7690; --acc:#16c5e8; --acc-tx:#04202a;
+  --rot:#f87171; --gruen:#4ade80; --gelb:#fbbf24;
+  --radius:16px;
+  color-scheme:dark;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);-webkit-text-size-adjust:100%}
+body{min-height:100vh;min-height:100dvh}
+button,input{font:inherit}
+.versteckt{display:none!important}
+a{color:var(--acc)}
+
+/* ═══════════════════════ Anmeldung ═══════════════════════ */
+#anmeldung{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;
+  padding:calc(env(safe-area-inset-top) + 24px) 20px calc(env(safe-area-inset-bottom) + 24px)}
+.karte-login{width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);border-radius:22px;
+  padding:26px 24px 22px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.logo{display:flex;gap:14px;align-items:center;margin-bottom:22px}
+.logo img{width:56px;height:56px;border-radius:14px;flex:none}
+.logo h1{margin:0;font-size:22px;letter-spacing:-.01em}
+.logo .unter{color:var(--tx2);font-size:13.5px;margin-top:2px}
+.feld{display:block;margin:12px 0}
+.feld span{display:block;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--tx3);margin-bottom:6px;font-weight:650}
+.feld input{width:100%;height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:#0a0f1b;color:var(--tx);
+  font-size:17px;outline:none;-webkit-appearance:none;appearance:none}
+.feld input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(22,197,232,.18)}
+.haken{display:flex;align-items:center;gap:10px;margin:12px 0 16px;color:var(--tx2);font-size:15px;min-height:44px;cursor:pointer}
+.haken input{width:20px;height:20px;accent-color:var(--acc);margin:0}
+.knopf{width:100%;height:50px;border-radius:14px;border:none;background:var(--acc);color:var(--acc-tx);font-weight:700;font-size:17px;cursor:pointer}
+.knopf:disabled{opacity:.6}
+.status{min-height:22px;margin-top:12px;font-size:14px;color:var(--tx2);text-align:center}
+.status.fehler{color:var(--rot)}
+.tipp{margin-top:18px;padding:12px 14px;border-radius:12px;background:var(--card2);color:var(--tx2);font-size:13.5px;line-height:1.45}
+.tipp b{color:var(--tx)}
+
+/* ═══════════════════════ App ═══════════════════════ */
+#app{max-width:880px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) calc(env(safe-area-inset-right) + 16px)
+  calc(env(safe-area-inset-bottom) + 40px) calc(env(safe-area-inset-left) + 16px)}
+#kopf{display:flex;align-items:center;gap:12px;padding:6px 0 16px}
+#kopf img{width:42px;height:42px;border-radius:11px;flex:none}
+#kopf h1{margin:0;font-size:20px;line-height:1.2}
+#kopf .sub{color:var(--tx2);font-size:13px;display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+#kopf .rechts{margin-left:auto;flex:none}
+.rund{height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:transparent;color:var(--tx2);cursor:pointer;font-size:14px}
+.marke{padding:2px 8px;border-radius:999px;background:#3a1f1f;color:#f8b4b4;font-size:12px}
+.karten{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:760px){.karten{grid-template-columns:1fr 1fr}}
+.karte{position:relative;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:var(--radius);
+  padding:16px 18px;display:flex;flex-direction:column}
+.k-titel{font-size:18px;font-weight:700;line-height:1.25}
+.k-meta{color:var(--tx2);font-size:13.5px;margin-top:4px}
+.k-text{color:var(--tx2);font-size:14px;margin-top:10px;line-height:1.45}
+.k-naechste{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--card2);display:grid;gap:3px}
+.k-naechste .lbl{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);font-weight:700}
+.k-naechste b{font-size:16px}
+.k-naechste .u{color:var(--tx2);font-size:14px}
+.k-knoepfe{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.k-knoepfe button{flex:1 1 150px;min-height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);
+  color:var(--tx);font-weight:650;font-size:15px;cursor:pointer}
+.k-knoepfe button.primaer{background:var(--acc);color:var(--acc-tx);border-color:transparent}
+.k-fuss{color:var(--tx3);font-size:12.5px;margin-top:auto;padding-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+h2{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin:26px 0 8px;font-weight:700}
+.link{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0;
+  color:var(--tx);text-decoration:none;min-height:56px}
+.link .punkt{width:10px;height:10px;border-radius:50%;background:var(--acc);flex:none}
+.link .l-titel{font-weight:650}
+.link .l-meta{color:var(--tx2);font-size:13px;margin-top:2px}
+.link .pfeil{margin-left:auto;color:var(--tx3);font-size:18px}
+.fuss{color:var(--tx3);font-size:12.5px;margin-top:28px;line-height:1.55}
+.fuss kbd{font:inherit;color:var(--tx2)}
+#laden{position:fixed;inset:0;background:rgba(7,10,18,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  z-index:100;color:var(--tx2);font-size:15px;text-align:center;padding:20px}
+.spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--line2);border-top-color:var(--acc);animation:dreh .8s linear infinite}
+@keyframes dreh{to{transform:rotate(360deg)}}
+#toast{position:fixed;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom) + 18px);z-index:110;background:#3a1f1f;color:#f8d0d0;
+  padding:12px 16px;border-radius:14px;font-size:15px;text-align:center;opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s;pointer-events:none}
+#toast.zeig{opacity:1;transform:translateY(0)}
+@media (min-width:700px){#toast{max-width:560px;margin:0 auto}}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ Anmeldung ═══════════════════════ -->
+<section id="anmeldung">
+  <form class="karte-login" id="login-form" autocomplete="on">
+    <div class="logo">
+      <img src="icons/icon-180.png" alt="">
+      <div><h1>Lerndashboards</h1><div class="unter">iPhone &amp; iPad · verschlüsselt</div></div>
+    </div>
+    <label class="feld"><span>Zugang</span>
+      <input type="text" id="login-name" name="username" autocomplete="username" value="Tom" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </label>
+    <label class="feld"><span>Passwort</span>
+      <input type="password" id="login-pw" name="password" autocomplete="current-password" required autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go">
+    </label>
+    <label class="haken"><input type="checkbox" id="login-merken"> Auf diesem Gerät angemeldet bleiben</label>
+    <button class="knopf" type="submit" id="login-knopf">Anmelden</button>
+    <div class="status" id="login-status"></div>
+    <div class="tipp versteckt" id="login-tipp"><b>Als App:</b> in Safari „Teilen → Zum Home-Bildschirm“. Die Dashboards laufen dann ohne Browserleisten im Vollbild, und das Häkchen oben ist vorbelegt.</div>
+  </form>
+</section>
+
+<!-- ═══════════════════════ App ═══════════════════════ -->
+<div id="app" class="versteckt">
+  <header id="kopf">
+    <img src="icons/icon-180.png" alt="">
+    <div style="min-width:0">
+      <h1>Lerndashboards</h1>
+      <div class="sub"><span id="kopf-schuljahr"></span><span id="kopf-stand"></span><span class="marke versteckt" id="kopf-offline">Offline</span></div>
+    </div>
+    <div class="rechts"><button class="rund" id="knopf-abmelden" type="button">Abmelden</button></div>
+  </header>
+  <main>
+    <div class="karten" id="liste"></div>
+    <section id="oeffentlich" class="versteckt">
+      <h2>Öffentliche Lernseiten (ohne Passwort)</h2>
+      <div id="links"></div>
+    </section>
+    <p class="fuss" id="fuss">Alle Dashboards liegen nur als AES-256-Chiffrat auf GitHub Pages und werden erst hier nach der Anmeldung entschlüsselt.
+      Im Dashboard: Wischen blättert, Tippen zeigt unten die Bedienleiste (Lösung · Alle · Übersicht); <kbd>‹ Lerndashboards</kbd> führt hierher zurück.
+      Angemeldet als <span id="fuss-wer"></span>.</p>
+  </main>
+</div>
+
+<div id="laden" class="versteckt"><div class="spinner"></div><div id="laden-text">Entschlüssele …</div></div>
+<div id="toast" role="status"></div>
+
+<script>
+/* Alles in einer Funktion: Nach dem Entschlüsseln ersetzt document.write() dieses Dokument durch das
+   Dashboard – das Window-Objekt bleibt dabei bestehen. Deshalb legt das Portal keine globalen
+   Namen an und räumt seine Fenster-Listener vorher weg. */
+(() => {
+"use strict";
+const $ = s => document.querySelector(s);
+const SESSION_KEY = "ld_sitzung";
+const NAME_KEY = "ld_name";
+const BASIS = location.href.split("#")[0].split("?")[0];        // Adresse des Portals ohne ?d= und #
+const STANDALONE = navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
+const WOCHENTAGE = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+
+let SESSION = null;            // {label, build, vaults:[{id,k,manifest}]}
+let MERKEN = false;
+let M = null;                  // entschlüsseltes Manifest
+let GEWUENSCHT = null;         // {id, hash} aus ?d=… beim Start
+const vaultKeys = new Map();
+const fensterListener = [];
+const timer = [];
+
+/* ─────────────────────────── Hilfen ─────────────────────────── */
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad2 = n => String(n).padStart(2, "0");
+function heuteIso(){ const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+function ausIso(s){ const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ""); return m ? new Date(+m[1], +m[2]-1, +m[3]) : null; }
+function fmtDatum(iso){ const d = ausIso(iso); return d ? `${WOCHENTAGE[d.getDay()]} ${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}` : ""; }
+function fmtStand(s){ const d = ausIso(s); if(!d) return ""; const m = /T(\d{2}):(\d{2})/.exec(s || ""); return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}${m ? " " + m[1] + ":" + m[2] : ""}`; }
+function fmtMiB(b){ return b ? (b / 1048576).toFixed(1).replace(".", ",") + " MB" : ""; }
+const sichereListe = l => Array.isArray(l) ? l : [];
+const istNetzfehler = e => e instanceof TypeError || /Failed to fetch|Load failed|NetworkError/i.test(String(e && e.message || ""));
+const fehlerText = e => istNetzfehler(e) ? "Keine Verbindung – und dieses Dashboard ist noch nicht offline gespeichert." : (e && e.message || String(e));
+function fensterHoeren(name, fn, opt){ window.addEventListener(name, fn, opt); fensterListener.push([name, fn, opt]); }
+function spaeter(fn, ms){ const t = setTimeout(fn, ms); timer.push(t); return t; }
+let toastTimer = null;
+function toast(text){ const t = $("#toast"); t.textContent = text; t.classList.add("zeig"); clearTimeout(toastTimer); toastTimer = spaeter(() => t.classList.remove("zeig"), 4200); }
+function loginStatus(text, fehler){ const s = $("#login-status"); s.textContent = text || ""; s.classList.toggle("fehler", !!fehler); }
+function ladenZeigen(text){ $("#laden-text").textContent = text || "Entschlüssele …"; $("#laden").classList.remove("versteckt"); }
+function ladenVerbergen(){ $("#laden").classList.add("versteckt"); }
+
+/* ─────────────────────────── Krypto (WebCrypto) ───────────────────────────
+   Muss zu build.py passen: Passwort NFC + trim + Kleinschreibung → PBKDF2-SHA256 (600 000) →
+   AES-256-GCM; Manifest und Dateien = 12-B-Nonce || Chiffrat (mit Tag). */
+function b64zu(s){ const bin = atob(s); const out = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) out[i] = bin.charCodeAt(i); return out; }
+const normalisiere = pw => String(pw || "").normalize("NFC").trim().toLowerCase();
+async function leiteKekRoh(passwort, saltB64, iterationen){
+  const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(normalisiere(passwort)), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name:"PBKDF2", salt:b64zu(saltB64), iterations:iterationen, hash:"SHA-256" }, material, 256);
+  return new Uint8Array(bits);
+}
+const importKek = roh => crypto.subtle.importKey("raw", roh, {name:"AES-GCM"}, false, ["decrypt"]);
+async function entschluesseleJSON(key, ivB64, ctB64){
+  const klar = await crypto.subtle.decrypt({name:"AES-GCM", iv:b64zu(ivB64)}, key, b64zu(ctB64));
+  return JSON.parse(new TextDecoder().decode(klar));
+}
+const importiereVaultKey = kB64 => crypto.subtle.importKey("raw", b64zu(kB64), {name:"AES-GCM"}, false, ["decrypt"]);
+async function entschluesseleBlock(key, puffer){
+  const bytes = new Uint8Array(puffer);
+  if(bytes.length < 13) throw new Error("Datei beschädigt");
+  return crypto.subtle.decrypt({name:"AES-GCM", iv:bytes.slice(0,12)}, key, bytes.slice(12));
+}
+
+/* ─────────────────────────── Sitzung & Daten ─────────────────────────── */
+async function ladeIndex(){
+  const r = await fetch("vaults/index.json", {cache:"no-store"});
+  if(!r.ok) throw new Error("index.json fehlt (" + r.status + ")");
+  return r.json();
+}
+async function pruefePasswort(passwort, idx){
+  for(const pr of sichereListe(idx.principals)){
+    const kek = await importKek(await leiteKekRoh(passwort, pr.salt, (idx.kdf && idx.kdf.iter) || 600000));
+    const offen = [];
+    for(const v of sichereListe(idx.vaults)){
+      for(const w of sichereListe(v.wraps)){
+        if(w.p !== pr.id) continue;
+        try{
+          const nutz = await entschluesseleJSON(kek, w.iv, w.ct);
+          offen.push({ id:v.id, manifest:v.manifest, k:nutz.k, label:nutz.label || "" });
+        }catch(e){ /* dieser Zugang passt nicht zu diesem Tresor */ }
+      }
+    }
+    if(offen.length) return { label: offen[0].label || "Leser", build: idx.build || "", vaults: offen.map(o => ({id:o.id, k:o.k, manifest:o.manifest})) };
+  }
+  return null;
+}
+function sitzungLesen(){
+  try{ const a = localStorage.getItem(SESSION_KEY); if(a) return {s:JSON.parse(a), merken:true}; }catch(e){}
+  try{ const b = sessionStorage.getItem(SESSION_KEY); if(b) return {s:JSON.parse(b), merken:false}; }catch(e){}
+  return null;
+}
+function sitzungSpeichern(s, merken){
+  const json = JSON.stringify(s);
+  try{ localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_KEY); }catch(e){}
+  try{ (merken ? localStorage : sessionStorage).setItem(SESSION_KEY, json); }catch(e){}
+}
+function sitzungVerwerfen(){ try{ localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_KEY); }catch(e){} }
+async function vaultKey(vid){
+  let key = vaultKeys.get(vid);
+  if(!key){
+    const v = (SESSION.vaults || []).find(x => x.id === vid);
+    if(!v) throw new Error("Kein Zugriff auf diesen Tresor");
+    key = await importiereVaultKey(v.k); vaultKeys.set(vid, key);
+  }
+  return key;
+}
+async function ladeManifest(session){
+  const v = sichereListe(session.vaults)[0];
+  if(!v) throw new Error("Kein Tresor in der Sitzung");
+  const key = await vaultKey(v.id);
+  const r = await fetch(v.manifest, {cache:"no-store"});
+  if(!r.ok){ const err = new Error("Manifest nicht erreichbar (" + r.status + ")"); err.status = r.status; throw err; }
+  const m = JSON.parse(new TextDecoder().decode(await entschluesseleBlock(key, await r.arrayBuffer())));
+  m._vault = v.id;
+  return m;
+}
+
+/* ─────────────────────────── Anzeige ─────────────────────────── */
+function naechste(e){
+  const heute = heuteIso();
+  const st = sichereListe(e.stunden).filter(s => s && s.datum).slice().sort((a, b) => a.datum < b.datum ? -1 : a.datum > b.datum ? 1 : 0);
+  const kommend = st.find(s => s.datum >= heute) || null;
+  const letzte = st.slice().reverse().find(s => s.datum < heute) || null;
+  return { kommend, letzte, heute: !!(kommend && kommend.datum === heute) };
+}
+function einheitName(e){ return (e.meta && e.meta.einheit) || "Stunde"; }
+function mehrzahl(einheit, n){ const m = {Stunde:"Stunden", Teil:"Teile", Lektion:"Lektionen", Kapitel:"Kapitel", Woche:"Wochen"}[einheit] || einheit + "n"; return `${n} ${m}`; }
+function naechsteBezeichnung(einheit){ return ({Stunde:"Nächste Stunde", Teil:"Nächster Teil", Lektion:"Nächste Lektion", Kapitel:"Nächstes Kapitel", Woche:"Nächste Woche"})[einheit] || "Nächste " + einheit; }
+function karteHtml(e){
+  const meta = e.meta || {};
+  const einheit = einheitName(e);
+  const kuerzel = meta.kuerzel || "";
+  const zeile = [e.klasse, e.modul, meta.zeit, meta.raum ? "Raum " + meta.raum : ""].filter(Boolean).join(" · ");
+  const n = naechste(e);
+  let block = "";
+  if(n.kommend){
+    const s = n.kommend;
+    block = `<div class="k-naechste"><span class="lbl">${n.heute ? "Heute" : esc(naechsteBezeichnung(einheit))}</span>
+      <b>${esc(fmtDatum(s.datum))} · ${esc(kuerzel ? kuerzel + s.nr : einheit + " " + s.nr)}${s.meilenstein ? " · " + esc(s.meilenstein) : ""}</b>
+      <span class="u">${esc(s.titel || "")}</span></div>`;
+  } else if(n.letzte){
+    block = `<div class="k-naechste"><span class="lbl">Zuletzt</span><b>${esc(fmtDatum(n.letzte.datum))} · ${esc(einheit)} ${esc(n.letzte.nr)}</b><span class="u">${esc(n.letzte.titel || "")}</span></div>`;
+  }
+  const startKnopf = n.kommend ? `<button type="button" class="primaer" data-oeffnen="${esc(e.id)}" data-hash="#/${esc(n.kommend.nr)}/1">${esc(einheit)} ${esc(n.kommend.nr)} starten</button>` : "";
+  const fehlt = !e.fid ? `<div class="k-text" style="color:var(--gelb)">Nicht im Tresor: ${esc(e.hinweis || "Datei fehlt")}</div>` : "";
+  const stunden = sichereListe(e.stunden).length;
+  return `<article class="karte" style="--acc:${esc(e.farbe || "#16c5e8")}">
+    <div class="k-titel">${esc(e.titel)}</div>
+    <div class="k-meta">${esc(zeile)}</div>
+    ${e.beschreibung ? `<div class="k-text">${esc(e.beschreibung.length > 220 ? e.beschreibung.slice(0, 217).trimEnd() + " …" : e.beschreibung)}</div>` : ""}
+    ${block}${fehlt}
+    <div class="k-knoepfe">${e.fid ? `<button type="button" data-oeffnen="${esc(e.id)}">Dashboard öffnen</button>${startKnopf}` : ""}</div>
+    <div class="k-fuss">${stunden ? `<span>${esc(mehrzahl(einheit, stunden))}</span>` : ""}${e.groesse ? `<span>${esc(fmtMiB(e.groesse))}</span>` : ""}${e.geaendert ? `<span>Stand ${esc(fmtStand(e.geaendert))}</span>` : ""}</div>
+  </article>`;
+}
+function linkHtml(e){
+  const farbe = (Array.isArray(e.farben) && e.farben[0]) || "#16c5e8";
+  const meta = [e.klasse, e.modul, e.art === "kompendium" ? "Kompendium" : "GitHub Pages"].filter(Boolean).join(" · ");
+  return `<a class="link" href="${esc(e.url)}" target="_blank" rel="noopener"><span class="punkt" style="background:${esc(farbe)}"></span>
+    <span><div class="l-titel">${esc(e.titel)}</div><div class="l-meta">${esc(meta)}</div></span><span class="pfeil">↗</span></a>`;
+}
+function render(){
+  const eintraege = sichereListe(M && M.eintraege);
+  const tresor = eintraege.filter(e => e.typ === "tresor");
+  const links = eintraege.filter(e => e.typ === "link");
+  $("#liste").innerHTML = tresor.length ? tresor.map(karteHtml).join("") : `<div class="k-text">Noch kein Dashboard im Tresor.</div>`;
+  $("#links").innerHTML = links.map(linkHtml).join("");
+  $("#oeffentlich").classList.toggle("versteckt", !links.length);
+  $("#kopf-schuljahr").textContent = M.schuljahr || "";
+  $("#kopf-stand").textContent = M.erstellt ? "Stand " + fmtStand(M.erstellt) : "";
+  $("#fuss-wer").textContent = (SESSION && SESSION.label) || "Leser";
+  $("#kopf-offline").classList.toggle("versteckt", navigator.onLine !== false);
+}
+function appZeigen(){
+  $("#anmeldung").classList.add("versteckt");
+  $("#app").classList.remove("versteckt");
+  render();
+}
+function loginZeigen(text, fehler){
+  $("#app").classList.add("versteckt");
+  $("#anmeldung").classList.remove("versteckt");
+  ladenVerbergen();
+  loginStatus(text || "", fehler);
+}
+
+/* ─────────────────────────── Dashboard öffnen ───────────────────────────
+   Die entschlüsselte HTML-Datei ersetzt dieses Dokument (document.write). Adresse bleibt die des
+   Portals, ergänzt um ?d=<Kennung> und den Folien-Anker (#/Stunde/Folie) – so startet ein Neuladen
+   wieder im selben Dashboard, und Verknüpfungen wie …/?d=prodi1-dp2et#/5/1 funktionieren. */
+function rueckwegHtml(){
+  const ziel = JSON.stringify(BASIS);
+  return `
+<style id="ld-portal-css">
+#ld-portal{position:fixed;z-index:60;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);left:calc(env(safe-area-inset-left,0px) + 12px);display:none;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:16px;border:1px solid rgba(255,255,255,.16);background:rgba(7,10,18,.78);color:#aab4c6;font:600 12.5px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;text-decoration:none;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+body.mode-dash #ld-portal{display:inline-flex}
+#ld-portal:hover{color:#fff;border-color:rgba(255,255,255,.32)}
+@media (max-width:640px){#ctrl{flex-wrap:wrap;justify-content:center;max-width:96vw}}
+@media print{#ld-portal{display:none!important}}
+</style>
+<a id="ld-portal" href="${esc(BASIS)}" title="Zurück zur Übersicht der Lerndashboards">‹ Lerndashboards</a>
+<script>(function(){var ziel=${ziel};function zurueck(e){e.preventDefault();e.stopPropagation();location.replace(ziel);}
+var a=document.getElementById('ld-portal');if(a)a.addEventListener('click',zurueck);
+var c=document.getElementById('ctrl');if(c){var k=document.createElement('button');k.type='button';k.title='Zurück zur Übersicht der Lerndashboards';
+k.innerHTML='<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/><path d="M4 12h16"/></svg>Lerndashboards';k.addEventListener('click',zurueck);c.insertBefore(k,c.firstChild);}})();<\/script>
+`;
+}
+function aufraeumen(){
+  for(const [name, fn, opt] of fensterListener) window.removeEventListener(name, fn, opt);
+  fensterListener.length = 0;
+  for(const t of timer) clearTimeout(t);
+  timer.length = 0;
+}
+function uebergeben(html){
+  const zusatz = rueckwegHtml();
+  const i = html.lastIndexOf("</body>");
+  html = i >= 0 ? html.slice(0, i) + zusatz + html.slice(i) : html + zusatz;
+  aufraeumen();
+  document.open();
+  document.write(html);
+  document.close();
+}
+async function oeffnen(id, hash){
+  const e = sichereListe(M && M.eintraege).find(x => x.id === id && x.typ === "tresor");
+  if(!e){ toast("Dieses Dashboard gibt es nicht (mehr)."); return; }
+  if(!e.fid){ toast("Dieses Dashboard liegt nicht im Tresor."); return; }
+  ladenZeigen(`Entschlüssele „${e.titel}“ …`);
+  try{
+    const key = await vaultKey(M._vault);
+    const r = await fetch(`vaults/${M._vault}/f/${e.fid}.enc`);
+    if(!r.ok) throw new Error("Datei nicht erreichbar (" + r.status + ")");
+    const html = new TextDecoder().decode(await entschluesseleBlock(key, await r.arrayBuffer()));
+    try{ history.replaceState(null, "", BASIS + "?d=" + encodeURIComponent(e.id) + (hash || "")); }catch(err){}
+    uebergeben(html);
+  }catch(err){
+    console.warn(err);
+    ladenVerbergen();
+    toast(fehlerText(err));
+  }
+}
+
+/* ─────────────────────────── Aktualisierung ─────────────────────────── */
+async function pruefeAktualisierung(){
+  try{
+    const idx = await ladeIndex();
+    if(!idx.build || idx.build === SESSION.build) return;
+    for(const v of SESSION.vaults){ const iv = sichereListe(idx.vaults).find(x => x.id === v.id); if(iv && iv.manifest) v.manifest = iv.manifest; }
+    M = await ladeManifest(SESSION);
+    SESSION.build = idx.build;
+    sitzungSpeichern(SESSION, MERKEN);
+    render();
+  }catch(e){ /* offline oder Tresor neu verschlüsselt – zeigt sich beim nächsten Öffnen */ }
+}
+
+/* ─────────────────────────── Ereignisse ─────────────────────────── */
+$("#login-form").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const pw = $("#login-pw").value; if(!pw) return;
+  const knopf = $("#login-knopf"); knopf.disabled = true;
+  loginStatus("Prüfe Zugang – Schlüssel wird abgeleitet …");
+  try{
+    const idx = await ladeIndex();
+    const session = await pruefePasswort(pw, idx);
+    if(!session){ loginStatus("Kein Zugang mit diesem Passwort gefunden.", true); return; }
+    loginStatus("Lade Übersicht …");
+    SESSION = session; MERKEN = $("#login-merken").checked;
+    M = await ladeManifest(session);
+    sitzungSpeichern(session, MERKEN);
+    try{ localStorage.setItem(NAME_KEY, session.label || $("#login-name").value || "Tom"); }catch(e){}
+    $("#login-pw").value = ""; loginStatus("");
+    appZeigen();
+    if(GEWUENSCHT){ const g = GEWUENSCHT; GEWUENSCHT = null; oeffnen(g.id, g.hash); }
+  }catch(e){
+    console.warn(e); SESSION = null;
+    loginStatus(istNetzfehler(e) ? "Keine Verbindung zum Portal." : "Fehler: " + (e.message || e), true);
+  }finally{ knopf.disabled = false; }
+});
+$("#liste").addEventListener("click", ev => {
+  const b = ev.target.closest("button[data-oeffnen]");
+  if(!b) return;
+  oeffnen(b.dataset.oeffnen, b.dataset.hash || "");
+});
+$("#knopf-abmelden").addEventListener("click", () => {
+  sitzungVerwerfen(); SESSION = null; M = null; vaultKeys.clear();
+  try{ history.replaceState(null, "", BASIS); }catch(e){}
+  loginZeigen("Abgemeldet.");
+});
+
+/* ─────────────────────────── Start ─────────────────────────── */
+async function start(){
+  const p = new URLSearchParams(location.search);
+  if(p.get("d")) GEWUENSCHT = { id: p.get("d"), hash: location.hash || "" };
+  if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(e => console.warn("Service Worker:", e)); }
+  fensterHoeren("online", () => $("#kopf-offline").classList.add("versteckt"));
+  fensterHoeren("offline", () => $("#kopf-offline").classList.remove("versteckt"));
+  try{ $("#login-name").value = localStorage.getItem(NAME_KEY) || "Tom"; }catch(e){}
+  $("#login-merken").checked = STANDALONE;
+  $("#login-tipp").classList.toggle("versteckt", !(IOS && !STANDALONE));
+
+  const gespeichert = sitzungLesen();
+  if(gespeichert && gespeichert.s && Array.isArray(gespeichert.s.vaults) && gespeichert.s.vaults.length){
+    loginStatus("Lade gespeicherte Sitzung …");
+    try{
+      SESSION = gespeichert.s; MERKEN = gespeichert.merken;
+      M = await ladeManifest(SESSION);
+      appZeigen();
+      if(GEWUENSCHT){ const g = GEWUENSCHT; GEWUENSCHT = null; oeffnen(g.id, g.hash); return; }
+      pruefeAktualisierung();
+      return;
+    }catch(e){
+      SESSION = null;
+      if(istNetzfehler(e) || (e && e.status >= 500)){
+        console.warn("Sitzung konnte nicht geladen werden:", e);
+        loginZeigen("Keine Verbindung – bitte später erneut versuchen.", true);
+      } else {
+        // Tresor neu verschlüsselt oder Passwort geändert: alte Sitzung ist wertlos.
+        sitzungVerwerfen();
+        loginZeigen("Der Tresor wurde neu verschlüsselt – bitte neu anmelden.", true);
+      }
+      return;
+    }
+  }
+  loginZeigen("");
+  if(!GEWUENSCHT) spaeter(() => { try{ $("#login-pw").focus(); }catch(e){} }, 300);
+}
+start();
+})();
+</script>
+</body>
+</html>

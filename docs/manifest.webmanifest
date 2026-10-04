@@ -1,0 +1,16 @@
+{
+  "name": "Lerndashboards",
+  "short_name": "Lerndashboards",
+  "description": "Lerndashboards von Tom Bleyer (LTEtt) – verschlüsselt, für iPhone und iPad.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#070a12",
+  "theme_color": "#070a12",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
