@@ -441,12 +441,21 @@ def repos_roh():
     return liste, ""
 
 
-def repos_signatur():
-    """Kurze Signatur der Repo-Liste für veroeffentlichen.py (None bei Fehler)."""
+def repos_signatur(eigenes: str = ""):
+    """Kurze Signatur der Repo-Liste für veroeffentlichen.py (None bei Fehler). Das Push-Datum des
+    eigenen Portal-Repos zählt nicht mit – es ändert sich bei jeder Veröffentlichung selbst."""
     roh, fehler = repos_roh()
     if roh is None:
         return None
-    return sorted([r.get("name", ""), r.get("pushed_at", ""), bool(r.get("private")), bool(r.get("has_pages"))] for r in roh)
+    eig = (eigenes or "").lower()
+    return sorted([r.get("name", ""), "" if r.get("name", "").lower() == eig else r.get("pushed_at", ""),
+                   bool(r.get("private")), bool(r.get("has_pages"))] for r in roh)
+
+
+def eigenes_repo(cfg: dict) -> str:
+    """Name des eigenen Repos aus zugangsdaten.json („repo“: https://github.com/<benutzer>/<name>.git)."""
+    m = re.search(r"/([^/]+?)(?:\.git)?/?$", str(cfg.get("repo") or ""))
+    return m.group(1) if m else ""
 
 
 def sammle_repos(cfg_repos: dict, alt: dict, ohne_abfrage: bool):

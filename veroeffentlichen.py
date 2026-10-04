@@ -77,7 +77,7 @@ def inventar(cfg, mit_repos=True):
                 p = ordner / name
                 if p.is_file():
                     inv[f"{bereich}/{ordner.relative_to(quelle).as_posix()}/{name}"] = stat_von(p)
-    inv["@repos"] = B.repos_signatur() if mit_repos else None
+    inv["@repos"] = B.repos_signatur(B.eigenes_repo(cfg)) if mit_repos else None
     return inv, manifest
 
 
