@@ -13,3 +13,6 @@ Pruefbilder*/
 # macOS
 .DS_Store
 __pycache__/
+
+# Sicherungskopien neben den Dateien (Konvention *.bak-JJJJMMTT)
+*.bak-*

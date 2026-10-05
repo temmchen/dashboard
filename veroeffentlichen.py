@@ -77,6 +77,23 @@ def inventar(cfg, mit_repos=True):
                 p = ordner / name
                 if p.is_file():
                     inv[f"{bereich}/{ordner.relative_to(quelle).as_posix()}/{name}"] = stat_von(p)
+    # Zuordnungen (Simulations-Filemanager) und Journal-Klassen fließen in den Build ein – Änderungen dort
+    # müssen ebenfalls eine Veröffentlichung auslösen.
+    pf = B.zuordnung_pfade(cfg)
+    if pf.get("zentral") and pf["zentral"].is_file():
+        inv["@zuordnung/zentral"] = stat_von(pf["zentral"])
+    j = pf.get("journal")
+    if j and j.is_dir():
+        dateien = [j / "config.json", j / "aktuelles-jahr.txt"]
+        try:
+            jahr = (j / "aktuelles-jahr.txt").read_text(encoding="utf-8").strip()
+            if jahr:
+                dateien += [j / jahr / "stundenplan.json", j / jahr / "skripte.json"]
+        except Exception:
+            pass
+        for q in dateien:
+            if q.is_file():
+                inv[f"@journal/{q.relative_to(j).as_posix()}"] = stat_von(q)
     inv["@repos"] = B.repos_signatur(B.eigenes_repo(cfg)) if mit_repos else None
     return inv, manifest
 

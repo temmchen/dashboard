@@ -28,6 +28,13 @@ Was aufgenommen wird (`quellen` in zugangsdaten.json):
   * Repos: `gh api user/repos` (alle eigenen, auch private), Pages-Adresse nach Konvention
     https://<benutzer>.github.io/<repo>/, QR-Code als Modulraster.
   * Rechner (`rechner` in zugangsdaten.json): die Schnellknöpfe oben auf der Startseite, mit QR.
+  * Zuordnung zu Klassen und Modulen (seit 05.10.2026): lokale Simulationen aus `zuordnung.json` im
+    Ordner (tiefere gewinnt), GitHub-Simulationen aus `Simulations-Filemanager/zuordnungen.json`
+    (Schlüssel `@github/<repo>`) – beides pflegt der Simulations-Filemanager (in Dashboard Pro die
+    Kachel „Simulationen“, Vorschau › Zuordnung). Dazu die Klassen und Module des Journal de Classe
+    (`manifest.klassenliste`), damit das Handy im Zuordnungs-Editor dieselben Chips anbietet.
+    Pfade nach Konvention neben der Quelle „simulationen“ (KI-Ordner) oder in zugangsdaten.json
+    → `zuordnung`: {"modul": …/zuordnung.py, "zentral": …/zuordnungen.json, "journal": …/Journal de Classe}.
 
 Krypto-Design (muss zu docs/index.html und docs/sw.js passen — wie Journal Mobil,
 Schuljahr- und CdM-Portal):
@@ -44,6 +51,7 @@ Die Quellordner werden ausschließlich GELESEN.
 import argparse
 import base64
 import datetime
+import importlib.util
 import json
 import re
 import secrets
@@ -239,6 +247,127 @@ def quellen(cfg: dict) -> dict:
     return {b: Path(p).expanduser() for b, p in q.items() if b in BEREICHE and p}
 
 
+# ─────────────────────────── Zuordnung (Klassen · Module) ───────────────────
+
+def ki_ordner(cfg: dict):
+    """Der KI-Ordner in OneDrive = Elternordner der Quelle „simulationen“ (dort liegen auch
+    Simulations-Filemanager und Journal de Classe)."""
+    q = quellen(cfg).get("simulationen")
+    return q.parent if q else None
+
+
+def zuordnung_pfade(cfg: dict) -> dict:
+    """{modul, zentral, journal} aus zugangsdaten.json → `zuordnung`, sonst nach Konvention im KI-Ordner."""
+    z = cfg.get("zuordnung") if isinstance(cfg.get("zuordnung"), dict) else {}
+    ki = ki_ordner(cfg)
+
+    def pfad(key, standard):
+        if z.get(key):
+            return Path(str(z[key])).expanduser()
+        return (ki / standard) if ki else None
+    return {"modul": pfad("modul", "Simulations-Filemanager/zuordnung.py"),
+            "zentral": pfad("zentral", "Simulations-Filemanager/zuordnungen.json"),
+            "journal": pfad("journal", "Journal de Classe")}
+
+
+_ZUORDNUNG_MODUL = None
+
+
+def zuordnung_modul(cfg: dict):
+    """zuordnung.py der Filemanager (gemeinsame Regeln, Journal-Klassen); None, wenn nicht vorhanden."""
+    global _ZUORDNUNG_MODUL
+    if _ZUORDNUNG_MODUL is None:
+        _ZUORDNUNG_MODUL = False
+        p = zuordnung_pfade(cfg)["modul"]
+        if p and p.is_file():
+            try:
+                spec = importlib.util.spec_from_file_location("zuordnung", p)
+                m = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(m)
+                _ZUORDNUNG_MODUL = m
+            except Exception as ex:
+                print(f"  ⚠️  zuordnung.py nicht ladbar ({ex}) – ohne Klassenliste aus dem Journal.")
+    return _ZUORDNUNG_MODUL or None
+
+
+def zuordnung_normal(d) -> dict:
+    """{klassen: […], module: {Klasse: [Module]}, modul: ""} aus einer zuordnung.json bzw. einem
+    zentralen Eintrag; leeres dict, wenn nichts Festes drinsteht."""
+    if not isinstance(d, dict):
+        return {}
+    klassen = []
+    for k in d.get("klassen") or []:
+        if isinstance(k, str) and k.strip():
+            k = k.strip()
+            k = "Allgemein" if k.upper() == "ALLGEMEIN" else k
+            if k not in klassen:
+                klassen.append(k)
+    if not klassen:
+        return {}
+    module = {}
+    roh = d.get("module") if isinstance(d.get("module"), dict) else {}
+    for k, v in roh.items():
+        ms = [str(m).strip() for m in (v if isinstance(v, list) else [v]) if isinstance(m, str) and str(m).strip()]
+        if ms:
+            module[str(k).strip()] = ms
+    return {"klassen": klassen, "module": module, "modul": str(d.get("modul") or "").strip()}
+
+
+def zuordnung_im_baum(ordner: Path, wurzel: Path) -> dict:
+    """zuordnung.json des Ordners oder des nächsten Elternordners bis zur Quelle (tiefere gewinnt)."""
+    o = ordner
+    while True:
+        z = zuordnung_normal(json_lesen(o / "zuordnung.json", "zuordnung.json"))
+        if z:
+            return z
+        if o == wurzel or wurzel not in o.parents:
+            return {}
+        o = o.parent
+
+
+def zuordnung_anwenden(e: dict, zuo: dict):
+    """Feste Zuordnung in einen Eintrag schreiben; klasse/fach (ein Feld) als Rückfall aus ihr füllen."""
+    if not zuo:
+        return
+    e["klassen"], e["module"], e["modul"] = zuo["klassen"], zuo["module"], zuo["modul"]
+    erste = next((k for k in zuo["klassen"] if k != "Allgemein"), "")
+    if not e.get("klasse") and erste:
+        e["klasse"] = erste
+    if not e.get("fach"):
+        ms = zuo["module"].get(erste) or []
+        e["fach"] = ms[0] if ms else zuo["modul"]
+
+
+def zentrale_zuordnungen(cfg: dict) -> dict:
+    """zuordnungen.json des Simulations-Filemanagers: {"@github/<repo>": {klassen, module, modul}}."""
+    p = zuordnung_pfade(cfg)["zentral"]
+    d = json_lesen(p, "zuordnungen.json") if p else None
+    e = d.get("eintraege") if isinstance(d, dict) else None
+    aus = {}
+    for k, v in (e or {}).items():
+        z = zuordnung_normal(v)
+        if z:
+            aus[str(k)] = z
+    return aus
+
+
+def klassenliste(cfg: dict) -> dict:
+    """Klassen und Module des Journal de Classe (über zuordnung.py) für den Zuordnungs-Editor am Handy."""
+    Z = zuordnung_modul(cfg)
+    j = zuordnung_pfade(cfg)["journal"]
+    if not Z or not j or not j.is_dir():
+        return {}
+    try:
+        k = Z.klassenliste(str(j))
+    except Exception as ex:
+        print(f"  ⚠️  Klassenliste aus dem Journal nicht lesbar: {ex}")
+        return {}
+    return {"schuljahr": k.get("schuljahr") or "",
+            "klassen": [{"id": x["id"], "name": x.get("name") or x["id"], "farbe": x.get("farbe") or "",
+                         "module": list(x.get("module") or [])} for x in (k.get("klassen") or []) if x.get("id")],
+            "module": list(k.get("module") or [])}
+
+
 # ─────────────────────────── Lerndashboards ─────────────────────────────────
 
 def sammle_lerndashboards(quelle: Path, max_bytes: int, ausschliessen: set):
@@ -388,6 +517,7 @@ def sammle_simulationen(quelle: Path, max_bytes: int, ausschliessen: set):
             "beschreibung": (re.search(r'<meta\s+name="description"\s+content="([^"]*)"', text, re.I) or [None, ""])[1],
             "start": html.name, "farbe": "#14b8a6",
         })
+        zuordnung_anwenden(e, zuordnung_im_baum(html.parent, quelle))   # feste Zuordnung aus zuordnung.json
         if hat_relative_verweise(text):
             e["mehrteilig"] = True
             dateien, zu_gross = dateien_im_ordner(html.parent, max_bytes)
@@ -621,8 +751,17 @@ def main():
     # ── Repos ──
     print("GitHub-Repos …")
     repos = sammle_repos(cfg.get("repos") or {}, alt.get("repos") or {}, args.ohne_repos)
+    zentral = zentrale_zuordnungen(cfg)                      # Zuordnung der GitHub-Simulationen (Simulations-Filemanager)
+    for r in repos.get("liste") or []:
+        for feld in ("klassen", "module", "modul"):
+            r.pop(feld, None)                                # nichts Altes aus der letzten Liste mitschleppen
+        zuordnung_anwenden(r, zentral.get("@github/" + str(r.get("name") or "")))
     neu["repos"] = {k: v for k, v in repos.items() if k != "schueler_apps"}
     manifest["repos"] = repos
+    manifest["klassenliste"] = klassenliste(cfg)             # Chips für den Zuordnungs-Editor am Handy
+    if zentral or manifest["klassenliste"]:
+        print(f"Zuordnung: {len(zentral)} GitHub-Zuordnung(en) · "
+              f"{len(manifest['klassenliste'].get('klassen') or [])} Klassen aus dem Journal")
     manifest["rechner"] = rechner_liste(cfg)
 
     vdir = VAULTS / vid

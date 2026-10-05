@@ -158,6 +158,23 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
   font-weight:650;font-size:14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
 .repo .r-knoepfe .primaer{background:var(--acc);color:var(--acc-tx);border-color:transparent}
 .leer{color:var(--tx3);font-size:14px;padding:18px 4px}
+/* Zuordnung (Klassen · Fächer) – Zeile unter dem Titel und Editor als Blatt von unten */
+.z-zuo{margin-top:5px;display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;font-size:12.5px;color:var(--tx2)}
+.z-zuo .tag{padding:1px 8px;border-radius:999px;border:1px solid var(--line2);background:var(--card2);color:var(--tx)}
+.z-zuo .tag.lokal{border-style:dashed;border-color:var(--gelb);color:var(--gelb);background:transparent}
+.z-zuo .ohne{color:var(--tx3)}
+.z-zuo .zuo-knopf{height:26px;padding:0 10px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--acc);font-size:12.5px;cursor:pointer}
+#zuo{position:fixed;inset:0;z-index:115;background:rgba(3,5,10,.72);display:flex;align-items:flex-end;justify-content:center}
+.zuo-karte{background:var(--card);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:18px 18px calc(env(safe-area-inset-bottom) + 18px);width:100%;max-width:640px;max-height:84vh;overflow:auto}
+.zuo-karte h3{margin:0 0 2px;font-size:18px;line-height:1.3}
+.zuo-karte .zuo-sub{color:var(--tx2);font-size:13px;margin-bottom:6px}
+.zuo-karte h4{margin:14px 0 6px;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3)}
+.zuo-karte .chips{margin-top:0}
+.zuo-karte .ohne{color:var(--tx3);font-size:13px}
+.zuo-fuss{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:16px;flex-wrap:wrap}
+.zuo-fuss .hinweis{color:var(--tx3);font-size:12.5px;flex:1 1 100%;line-height:1.4}
+.zuo-fuss button{min-height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);color:var(--tx);font-size:15px;cursor:pointer}
+.zuo-fuss button.primaer{background:var(--acc);color:var(--acc-tx);border-color:transparent;font-weight:650}
 .fuss{color:var(--tx3);font-size:12.5px;margin-top:28px;line-height:1.55}
 .fuss kbd{font:inherit;color:var(--tx2)}
 
@@ -268,6 +285,7 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
   </main>
 </div>
 
+<div id="zuo" class="versteckt"><div class="zuo-karte" role="dialog" aria-modal="true" aria-labelledby="zuo-titel"><h3 id="zuo-titel"></h3><div class="zuo-sub" id="zuo-sub"></div><div id="zuo-inhalt"></div><div class="zuo-fuss"><div class="hinweis">Gilt auf diesem Gerät (Filter und Anzeige). Für alle Geräte: am Mac in Dashboard Pro › Simulationen › Vorschau › „Zuordnung“ – die nächste Veröffentlichung bringt sie aufs Handy, eine gleiche Festlegung hier verschwindet dann von selbst.</div><button type="button" id="zuo-reset">Wie am Mac</button><button type="button" class="primaer" id="zuo-fertig">Fertig</button></div></div></div>
 <div id="qr" class="versteckt"><div class="qr-karte"><div class="qr-titel"></div><div class="qr-bild"></div><div class="qr-url"></div><div class="qr-hinweis">Tippen schließt</div></div></div>
 <div id="laden" class="versteckt"><div class="spinner"></div><div id="laden-text">Entschlüssele …</div></div>
 <div id="toast" role="status"></div>
@@ -450,21 +468,107 @@ function swVergessen(){
 }
 
 /* ─────────────────────────── Filemanager: Suche + Facetten ─────────────────────────── */
-function klassenVon(e){
-  const k = [];
-  for(const x of sichereListe(e.klassen)) if(x) k.push(normKlasse(x) === "ALLGEMEIN" ? "Allgemein" : normKlasse(x));
-  if(e.klasse) k.push(normKlasse(e.klasse));
-  return [...new Set(k.filter(Boolean))];
+/* ─────────────────────────── Zuordnung (Klassen · Fächer) ───────────────────────────
+   Wirksam ist: Festlegung auf diesem Gerät (localStorage) › vom Mac veröffentlichte Zuordnung
+   (zuordnung.json / zuordnungen.json des Simulations-Filemanagers) › automatisch erkannte Klasse/Fach. */
+const ZUO_KEY = "dm-zuordnung";
+let ZUO = {};
+try{ ZUO = JSON.parse(lsLesen(ZUO_KEY, "{}")) || {}; }catch(e){ ZUO = {}; }
+function zuoSpeichern(){ lsSchreiben(ZUO_KEY, JSON.stringify(ZUO)); }
+const normListe = l => [...new Set(sichereListe(l).map(x => normKlasse(x) === "ALLGEMEIN" ? "Allgemein" : normKlasse(x)).filter(Boolean))];
+function zuoNorm(z){
+  if(!z) return null;
+  const klassen = normListe(z.klassen);
+  if(!klassen.length) return null;
+  const module = {};
+  for(const k of klassen){ if(k === "Allgemein") continue; const ms = normListe(z.module && z.module[k]); if(ms.length) module[k] = ms; }
+  return {klassen, module};
 }
-function fachVon(e){ return normKlasse(e.fach || e.modul || ""); }
+const zuoGleich = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const zuoVeroeffentlicht = e => zuoNorm({klassen: e.klassen, module: e.module});
+function zuordnungVon(e){
+  const mac = zuoVeroeffentlicht(e);
+  const lokal = zuoNorm(ZUO[e.id]);
+  if(lokal && mac && zuoGleich(lokal, mac)){ delete ZUO[e.id]; zuoSpeichern(); }      // der Mac hat nachgezogen
+  else if(lokal) return {...lokal, quelle: "geraet"};
+  if(mac) return {...mac, quelle: "mac"};
+  const k = e.klasse ? normKlasse(e.klasse) : "", f = normKlasse(e.fach || e.modul || "");
+  if(k) return {klassen: [k], module: f ? {[k]: [f]} : {}, quelle: "auto"};
+  return {klassen: [], module: {}, fach: f, quelle: f ? "auto" : "keine"};
+}
+function klassenVon(e){ return zuordnungVon(e).klassen; }
+function faecherVon(e){
+  const z = zuordnungVon(e);
+  const f = new Set(Object.values(z.module).flat());
+  if(z.fach) f.add(z.fach);
+  return [...f];
+}
+function fachVon(e){ return faecherVon(e)[0] || ""; }
+function zuoZeile(e){
+  const z = zuordnungVon(e);
+  const lokal = z.quelle === "geraet";
+  const tags = z.klassen.map(k => `<span class="tag${lokal ? " lokal" : ""}">${esc(k)}${(z.module[k] || []).length ? " · " + esc(z.module[k].join(", ")) : ""}</span>`).join("");
+  return `<div class="z-zuo">${tags || `<span class="ohne">ohne Zuordnung</span>`}${lokal ? `<span class="ohne">auf diesem Gerät</span>` : ""}<button type="button" class="zuo-knopf" data-zuo="${esc(e.id)}" aria-label="Zuordnung ändern">Zuordnung</button></div>`;
+}
+let ZUO_AKTIV = null;
+function zuoEintrag(id){
+  const e = bereich("simulationen").find(x => x.id === id);
+  if(e) return e;
+  const r = repos().find(x => "@" + x.name === id);
+  return r ? repoAlsSimulation(r) : null;
+}
+const zuoListe = () => (M && M.klassenliste) || {klassen: [], module: []};
+function zuoZeigen(id){
+  const e = zuoEintrag(id); if(!e) return;
+  ZUO_AKTIV = e;
+  $("#zuo-titel").textContent = e.titel || e.name || id;
+  $("#zuo").classList.remove("versteckt");
+  zuoRender();
+}
+function zuoRender(){
+  const e = ZUO_AKTIV; if(!e) return;
+  const z = zuordnungVon(e), liste = zuoListe();
+  const bekannte = sichereListe(liste.klassen).map(k => k.id);
+  const alleKlassen = [...new Set([...bekannte, ...z.klassen.filter(k => k !== "Allgemein")])];
+  const quelle = {geraet: "festgelegt auf diesem Gerät", mac: "vom Mac (Simulations-Filemanager)", auto: "automatisch erkannt", keine: "noch keine Zuordnung"}[z.quelle];
+  $("#zuo-sub").textContent = quelle + (liste.schuljahr ? ` · Klassen laut Journal ${liste.schuljahr}` : "");
+  const chip = (wert, an, feld, klasse) => `<button type="button" class="chip${an ? " an" : ""}" data-zuo-feld="${feld}" data-zuo-wert="${esc(wert)}"${klasse ? ` data-zuo-klasse="${esc(klasse)}"` : ""}>${esc(wert)}</button>`;
+  let html = `<h4>Klassen</h4><div class="chips">` + chip("Allgemein", z.klassen.includes("Allgemein"), "klasse") + alleKlassen.map(k => chip(k, z.klassen.includes(k), "klasse")).join("") + `</div>`;
+  for(const k of z.klassen){
+    if(k === "Allgemein") continue;
+    const info = sichereListe(liste.klassen).find(x => x.id === k);
+    const module = [...new Set([...(info ? sichereListe(info.module) : []), ...(z.module[k] || [])])];
+    html += `<h4>${esc(k)} · Fach / Modul</h4><div class="chips klein">` + (module.length ? module.map(m => chip(m, (z.module[k] || []).includes(m), "modul", k)).join("") : `<span class="ohne">keine Module im Journal</span>`) + `</div>`;
+  }
+  $("#zuo-inhalt").innerHTML = html;
+  $("#zuo-reset").classList.toggle("versteckt", !ZUO[e.id]);
+}
+function zuoAendern(feld, wert, klasse){
+  const e = ZUO_AKTIV; if(!e) return;
+  const z = zuordnungVon(e);
+  let klassen = [...z.klassen]; const module = {...z.module};
+  if(feld === "klasse"){
+    if(klassen.includes(wert)){ klassen = klassen.filter(k => k !== wert); delete module[wert]; }
+    else klassen.push(wert);
+  } else {
+    const ms = [...(module[klasse] || [])];
+    module[klasse] = ms.includes(wert) ? ms.filter(m => m !== wert) : [...ms, wert];
+    if(!module[klasse].length) delete module[klasse];
+  }
+  const neu = zuoNorm({klassen, module}), mac = zuoVeroeffentlicht(e);
+  if(!neu || (mac && zuoGleich(neu, mac))) delete ZUO[e.id];       // leer bzw. wie am Mac → keine lokale Festlegung
+  else ZUO[e.id] = {...neu, geaendert: new Date().toISOString()};
+  zuoSpeichern(); zuoRender(); renderSimulationen();
+}
+function zuoZu(){ ZUO_AKTIV = null; $("#zuo").classList.add("versteckt"); }
 function suchtext(e){
-  return [e.titel, e.beschreibung, e.klasse, (e.klassen || []).join(" "), e.modul, e.fach, e.thema, e.einheit, e.jahr, e.datum,
+  return [e.titel, e.beschreibung, e.klasse, zuordnungVon(e).klassen.join(" "), faecherVon(e).join(" "), e.modul, e.fach, e.thema, e.einheit, e.jahr, e.datum,
           e.meta && e.meta.modulname, e.name, e.sprache, (e.topics || []).join(" "),
           ...sichereListe(e.stunden).map(s => `${s.nr} ${s.titel || ""} ${s.untertitel || ""}`)].filter(Boolean).join(" ").toLowerCase();
 }
 function fmPasst(e, st){
   if(st.klasse !== "alle" && !klassenVon(e).includes(st.klasse)) return false;
-  if(st.fach !== "alle" && fachVon(e) !== st.fach) return false;
+  if(st.fach !== "alle" && !faecherVon(e).includes(st.fach)) return false;
   if(st.suche && !suchtext(e).includes(st.suche)) return false;
   return true;
 }
@@ -565,20 +669,21 @@ function renderLerndashboards(){
 function repoAlsSimulation(r){
   const text = `${r.name} ${sichereListe(r.topics).join(" ")} ${r.beschreibung || ""}`;
   return { typ:"repo", id:"@" + r.name, titel:r.name, beschreibung:r.beschreibung || "", klasse:ersteFundstelle(KLASSEN_MUSTER, text),
-           fach:ersteFundstelle(FACH_MUSTER, text), url:r.pages, name:r.name, topics:r.topics, sprache:r.sprache, gepusht:r.gepusht, qr:r.qr };
+           fach:ersteFundstelle(FACH_MUSTER, text), klassen:sichereListe(r.klassen), module:r.module || {}, modul:r.modul || "",
+           url:r.pages, name:r.name, topics:r.topics, sprache:r.sprache, gepusht:r.gepusht, qr:r.qr };
 }
 function zeileSimulation(e){
   const bereit = !!(e.start && e.dateien && e.dateien[e.start]);
   const dateien = Object.keys(e.dateien || {}).length;
   const meta = [e.einheit, e.datum ? fmtTag(e.datum) : "", e.mehrteilig ? `${dateien} Dateien` : "", e.groesse ? fmtMiB(e.groesse) : ""].filter(Boolean).join(" · ");
   return `<div class="zeile"><span class="punkt" style="background:${esc(e.farbe || "#14b8a6")}"></span>
-    <span class="z-mitte"><div class="z-titel">${esc(e.titel)}</div><div class="z-meta">${esc(meta || e.beschreibung || "")}</div>${!bereit ? `<div class="z-meta" style="color:var(--gelb)">Nicht im Tresor: ${esc(e.hinweis || "Datei fehlt")}</div>` : ""}</span>
+    <span class="z-mitte"><div class="z-titel">${esc(e.titel)}</div><div class="z-meta">${esc(meta || e.beschreibung || "")}</div>${zuoZeile(e)}${!bereit ? `<div class="z-meta" style="color:var(--gelb)">Nicht im Tresor: ${esc(e.hinweis || "Datei fehlt")}</div>` : ""}</span>
     <span class="z-knoepfe">${bereit ? `<button type="button" class="primaer" data-oeffnen="${esc(e.id)}">Öffnen</button>` : ""}</span></div>`;
 }
 function zeileRepoSimulation(e){
-  const meta = [e.klasse, e.fach, e.gepusht ? "zuletzt " + fmtTag(e.gepusht) : ""].filter(Boolean).join(" · ");
+  const meta = e.gepusht ? "zuletzt " + fmtTag(e.gepusht) : "";
   return `<div class="zeile"><span class="punkt" style="background:var(--tuerkis)"></span>
-    <span class="z-mitte"><div class="z-titel">${esc(e.name)}</div><div class="z-meta">${esc(kuerzen(e.beschreibung || meta, 120))}</div></span>
+    <span class="z-mitte"><div class="z-titel">${esc(e.name)}</div><div class="z-meta">${esc(kuerzen(e.beschreibung || meta, 120))}</div>${zuoZeile(e)}</span>
     <span class="z-knoepfe"><a class="primaer" href="${esc(e.url)}" target="_blank" rel="noopener">Öffnen ↗</a>${e.qr ? `<button type="button" data-qr="${esc(e.name)}">QR</button>` : ""}</span></div>`;
 }
 function renderSimulationen(){
@@ -587,7 +692,8 @@ function renderSimulationen(){
   const gh = repos().filter(r => r.simulation && !r.archiviert).map(repoAlsSimulation);
   const alle = lokal.concat(gh);
   $("#chips-simulationen").innerHTML = chipsHtml("simulationen", "klasse", zaehleWerte(alle, klassenVon), st.klasse, "Alle Klassen");
-  const faecher = zaehleWerte(alle.filter(e => st.klasse === "alle" || klassenVon(e).includes(st.klasse)), e => fachVon(e) ? [fachVon(e)] : []);
+  const faecher = zaehleWerte(alle.filter(e => st.klasse === "alle" || klassenVon(e).includes(st.klasse)),
+                              e => st.klasse === "alle" ? faecherVon(e) : (zuordnungVon(e).module[st.klasse] || faecherVon(e)));
   $("#chips2-simulationen").innerHTML = faecher.length > 1 ? chipsHtml("simulationen", "fach", faecher, st.fach, "Alle Fächer") : "";
   const lokalT = lokal.filter(e => fmPasst(e, st));
   const ghT = gh.filter(e => fmPasst(e, st));
@@ -934,6 +1040,8 @@ $("#app").addEventListener("click", ev => {
   const k = ev.target.closest("[data-ansicht]");
   if(k){ ansichtZeigen(k.dataset.ansicht); return; }
   if(ev.target.closest("#knopf-start")){ ansichtZeigen("start"); return; }
+  const zb = ev.target.closest("[data-zuo]");
+  if(zb){ zuoZeigen(zb.dataset.zuo); return; }
   const q = ev.target.closest("[data-qr]");
   if(q){ const r = repos().find(x => x.name === q.dataset.qr); if(r) qrZeigen(r.name, r.pages, r.qr); return; }
   const qr = ev.target.closest("[data-qr-rechner]");
@@ -948,6 +1056,12 @@ $("#app").addEventListener("input", ev => {
   renderer[s.dataset.fm]();
 });
 $("#qr").addEventListener("click", () => $("#qr").classList.add("versteckt"));
+$("#zuo").addEventListener("click", ev => {
+  if(ev.target === $("#zuo") || ev.target.closest("#zuo-fertig")){ zuoZu(); return; }
+  const c = ev.target.closest("button[data-zuo-feld]");
+  if(c){ zuoAendern(c.dataset.zuoFeld, c.dataset.zuoWert, c.dataset.zuoKlasse); return; }
+  if(ev.target.closest("#zuo-reset") && ZUO_AKTIV){ delete ZUO[ZUO_AKTIV.id]; zuoSpeichern(); zuoRender(); renderSimulationen(); }
+});
 $("#knopf-aktualisieren").addEventListener("click", () => { aktualisieren(true); appAktualisieren(); });
 $("#knopf-abmelden").addEventListener("click", () => {
   swVergessen();

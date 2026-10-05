@@ -44,6 +44,27 @@ verschlüsselt (neues Passwort, `--neu-verschluesseln`), führt ↻ zur Anmeldun
 Fassung der App selbst (index.html, sw.js) gibt, und lädt die Seite dann einmal neu – eine Web-App auf dem
 Home-Bildschirm bleibt sonst tagelang bei der alten Fassung.
 
+## Zuordnung zu Klassen und Fächern (seit 05.10.2026)
+
+Jede Simulation trägt unter dem Titel ihre **Zuordnung** (Klasse · Fach/Modul) als Chips – dieselbe Zuordnung,
+die am Mac die Filemanager verwalten – und einen Knopf **„Zuordnung“**. Die Filter-Chips *Klasse* und *Fach*
+richten sich danach.
+
+| Quelle | Woher | Rang |
+| --- | --- | --- |
+| **auf diesem Gerät** (gestrichelt gelb) | Knopf „Zuordnung“ in der App: Klassen- und Fach-Chips antippen, jede Änderung wird sofort im Gerät gespeichert (`localStorage` `dm-zuordnung`) | gewinnt |
+| **vom Mac** | `zuordnung.json` im Ordner der Simulation bzw. `Simulations-Filemanager/zuordnungen.json` für GitHub-Repos (`@github/<repo>`) – gepflegt in Dashboard Pro › Simulationen › Vorschau › „Zuordnung“; kommt mit der nächsten Veröffentlichung aufs Handy | danach |
+| **automatisch** | Klasse/Fach aus Ordnerpfad, Repo-Name, Topics oder Beschreibung | Rückfall |
+
+Die Chips des Editors sind die **Klassen und Module des Journal de Classe** (`manifest.klassenliste`, über
+`zuordnung.py` des Simulations-Filemanagers gelesen), dazu „Allgemein“ und bereits zugeordnete Kürzel.
+**„Wie am Mac“** löscht die Festlegung des Geräts; stimmt sie mit der veröffentlichten überein, verschwindet
+sie von selbst. Die Festlegung am Gerät gilt nur dort (wie die Häkchen „gehalten“) – der Mac erfährt nichts
+davon; für alle Geräte gilt der Weg über Dashboard Pro. `veroeffentlichen.py` erkennt geänderte
+`zuordnungen.json`, `zuordnung.json` und Journal-Klassen als Änderung und baut dann neu.
+Pfade nach Konvention neben der Quelle `simulationen` (KI-Ordner), sonst in `zugangsdaten.json` → `zuordnung`
+(`modul`, `zentral`, `journal`).
+
 ## Alltag
 
 ```bash
