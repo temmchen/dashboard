@@ -280,7 +280,7 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
 
     <p class="fuss" id="fuss">Alle Inhalte liegen nur als AES-256-Chiffrat auf GitHub Pages und werden erst hier nach der Anmeldung entschlüsselt.
       In Dashboards und Präsentationen: Wischen blättert, Tippen zeigt die Bedienleiste; <kbd>‹ Dashboard</kbd> führt hierher zurück.
-      <kbd>↻</kbd> oben holt die neuesten Listen, wenn am Mac gerade veröffentlicht wurde.
+      <kbd>↻</kbd> oben holt, was der Mac zuletzt veröffentlicht hat; Neues veröffentlicht der Portal-Wächter am Mac alle 20 Minuten von selbst.
       Angemeldet als <span id="fuss-wer"></span>.</p>
   </main>
 </div>
@@ -783,7 +783,7 @@ function renderRepos(){
 /* ─────────────────────────── Ansichten ─────────────────────────── */
 function render(){
   $("#kopf-schuljahr").textContent = M.schuljahr || "";
-  $("#kopf-stand").textContent = M.erstellt ? "Stand " + fmtStand(M.erstellt) : "";
+  $("#kopf-stand").textContent = M.erstellt ? "Veröffentlicht " + fmtStand(M.erstellt) : "";
   $("#fuss-wer").textContent = (SESSION && SESSION.label) || "Leser";
   $("#kopf-offline").classList.toggle("versteckt", navigator.onLine !== false);
   renderStart(); renderLerndashboards(); renderSimulationen(); renderPraesentationen(); renderRepos();
@@ -953,7 +953,7 @@ async function aktualisieren(manuell){
     const a = await indexAbgleichen();
     if(a.stand === "unklar"){ if(manuell) toast(nichtErreichbar(a.fehler)); return; }
     aktualisiertUm = Date.now();
-    if(a.stand === "gleich"){ if(manuell) toast("Schon aktuell · Stand " + fmtStand(M.erstellt), "ok"); return; }
+    if(a.stand === "gleich"){ if(manuell) toast("Kein neuer Stand vom Mac · zuletzt veröffentlicht " + fmtStand(M.erstellt), "ok"); return; }
     const vorher = kennungen();
     const v = SESSION.vaults[0], manifestAlt = v.manifest;
     v.manifest = a.manifest;
@@ -976,7 +976,7 @@ async function aktualisieren(manuell){
     const nachher = kennungen();
     const dazu = [...nachher].filter(k => !vorher.has(k)).length, weg = [...vorher].filter(k => !nachher.has(k)).length;
     const was = [dazu ? (dazu === 1 ? "1 neuer Eintrag" : dazu + " neue Einträge") : "", weg ? weg + " entfernt" : ""].filter(Boolean).join(" · ") || "keine neuen Einträge";
-    toast(`Aktualisiert · Stand ${fmtStand(M.erstellt)} · ${was}`, "ok");
+    toast(`Aktualisiert · veröffentlicht ${fmtStand(M.erstellt)} · ${was}`, "ok");
   }catch(e){
     console.warn("Aktualisierung:", e);
     if(istSchluesselfehler(e)) neuVerschluesselt();

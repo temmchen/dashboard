@@ -7,7 +7,7 @@ pruefung_refresh.py — Dashboard Mobil · Prüft den Knopf ↻ (Aktualisieren) 
 Kopiert docs/ in einen Temp-Ordner, startet dort einen lokalen Webserver (127.0.0.1), meldet sich in
 headless Chrome an (Profil iPhone) und spielt durch, was am Mac „veröffentlichen“ auf dem Gerät auslöst:
 
-  1. ↻ ohne Änderung                       → „Schon aktuell · Stand …“, Stand im Kopf unverändert
+  1. ↻ ohne Änderung                       → „Kein neuer Stand vom Mac · zuletzt veröffentlicht …“, Kopf unverändert
   2. simulierte Veröffentlichung (Manifest entschlüsseln, eine Simulation + ein Repo anhängen, neu
      verschlüsseln, neuer Build in index.json) → ↻ → „Aktualisiert · Stand … · 2 neue Einträge“,
      neuer Stand im Kopf, Eintrag in der Simulationsliste, Repo-Zahl +1; Service-Worker-Cache ohne ?t=-Einträge
@@ -201,8 +201,8 @@ def main():
 
         # 1) ↻ ohne Änderung
         cdp.js("document.getElementById('knopf-aktualisieren').click()", warten=False)
-        t = toast_mit('Schon aktuell')
-        melde('↻ ohne Änderung → „Schon aktuell“', 'Schon aktuell' in t and cdp.js("document.getElementById('kopf-stand').textContent") == stand0, t)
+        t = toast_mit('Kein neuer Stand')
+        melde('↻ ohne Änderung → „Kein neuer Stand vom Mac“', 'Kein neuer Stand' in t and cdp.js("document.getElementById('kopf-stand').textContent") == stand0, t)
         knopf_frei()
         cdp.bild(bilder / 'iphone-02-schon-aktuell.png')
         js_fehler('(Schon aktuell)')
@@ -228,7 +228,7 @@ def main():
         drin = cdp.js("[...document.querySelectorAll('#liste-simulationen .z-titel')].some(z => z.textContent.indexOf('Prüfung Refresh') >= 0)")
         melde('Neue Simulation steht in der Liste', bool(drin), cdp.js("document.getElementById('info-simulationen').textContent") + f' (vorher {sim_vorher})')
         cdp.bild(bilder / 'iphone-03-aktualisiert.png')
-        schluessel = cdp.js("caches.open('dm-v2').then(c => c.keys()).then(ks => ks.map(k => k.url))")
+        schluessel = cdp.js("caches.keys().then(ns => Promise.all(ns.filter(n => n.startsWith('dm-')).map(n => caches.open(n).then(c => c.keys())))).then(l => l.flat().map(k => k.url))")
         mit_zusatz = [u for u in (schluessel or []) if '?' in u]
         melde('Service-Worker-Cache ohne ?t=-Einträge', not mit_zusatz and any(u.endswith('/vaults/index.json') for u in (schluessel or [])),
               f'{len(schluessel or [])} Einträge' + (', mit Zusatz: ' + ', '.join(mit_zusatz[:3]) if mit_zusatz else ''))
@@ -269,8 +269,8 @@ def main():
         melde('Neustart: gespeicherte Sitzung, neuer Stand ohne Anmeldung', repo_zahl(cdp) == erwartet, f'{repo_zahl(cdp)} Repos · ' + cdp.js("document.getElementById('kopf-stand').textContent"))
         melde('Neustart: Build der Sitzung gespeichert', bool(cdp.js(f"JSON.parse(localStorage.getItem('dm_sitzung')).build === {json.dumps(json.loads((docs / 'vaults' / 'index.json').read_text())['build'])}")))
         cdp.js("document.getElementById('knopf-aktualisieren').click()", warten=False)
-        t = toast_mit('Schon aktuell')
-        melde('Nach Neustart ↻ → „Schon aktuell“', 'Schon aktuell' in t, t)
+        t = toast_mit('Kein neuer Stand')
+        melde('Nach Neustart ↻ → „Kein neuer Stand vom Mac“', 'Kein neuer Stand' in t, t)
         knopf_frei()
         js_fehler('(Neustart)')
         cdp.pumpe(4.5)

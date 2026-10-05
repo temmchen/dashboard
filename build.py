@@ -551,11 +551,17 @@ def qr_raster(text: str):
         return None
 
 
+def gh_programm() -> str:
+    """gh auch unter launchd finden (Portal-Wächter): dort fehlt /opt/homebrew/bin im PATH, und ohne
+    gh bliebe die Repo-Liste still bei der letzten Fassung."""
+    return shutil.which("gh") or next((p for p in ("/opt/homebrew/bin/gh", "/usr/local/bin/gh") if Path(p).exists()), "gh")
+
+
 def repos_roh():
     """Alle eigenen Repos über gh (eine Zeile JSON je Repo); None bei Fehler."""
     felder = "{name,private,has_pages,archived,fork,language,topics,pushed_at,created_at,html_url,homepage,size,description}"
     try:
-        r = subprocess.run(["gh", "api", "--paginate", "user/repos?affiliation=owner&per_page=100",
+        r = subprocess.run([gh_programm(), "api", "--paginate", "user/repos?affiliation=owner&per_page=100",
                             "--jq", ".[] | " + felder], capture_output=True, text=True, timeout=90)
     except Exception as ex:
         return None, f"gh nicht ausführbar: {ex}"
@@ -572,14 +578,17 @@ def repos_roh():
     return liste, ""
 
 
-def repos_signatur(eigenes: str = ""):
-    """Kurze Signatur der Repo-Liste für veroeffentlichen.py (None bei Fehler). Das Push-Datum des
-    eigenen Portal-Repos zählt nicht mit – es ändert sich bei jeder Veröffentlichung selbst."""
+def repos_signatur(eigenes: str = "", portale=None):
+    """Kurze Signatur der Repo-Liste für veroeffentlichen.py (None bei Fehler). Die Push-Daten des
+    eigenen Repos und der anderen Portale (`repos.portale`: journal-mobil, schuljahr-portal, CdM …) zählen
+    nicht mit – die veröffentlichen laufend selbst (Portal-Wächter), sonst zöge jede Journal-Veröffentlichung
+    einen neuen Dashboard-Build nach sich. Neue, umbenannte, privat/öffentlich oder mit Pages geschaltete
+    Repos zählen immer."""
     roh, fehler = repos_roh()
     if roh is None:
         return None
-    eig = (eigenes or "").lower()
-    return sorted([r.get("name", ""), "" if r.get("name", "").lower() == eig else r.get("pushed_at", ""),
+    ohne = {(eigenes or "").lower()} | {str(p).lower() for p in (portale or [])}
+    return sorted([r.get("name", ""), "" if r.get("name", "").lower() in ohne else r.get("pushed_at", ""),
                    bool(r.get("private")), bool(r.get("has_pages"))] for r in roh)
 
 

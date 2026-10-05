@@ -37,7 +37,10 @@ einmal veröffentlicht wurde; die Repo-Liste wird bei jeder Veröffentlichung ne
 
 **Aktualisieren (↻ oben rechts):** holt `vaults/index.json` und das Manifest frisch – mit Zusatz `?t=…`, also am
 Zwischenspeicher von GitHub Pages (bis zu 10 Minuten) vorbei –, zeichnet bei neuem Build alle Listen neu und
-meldet „Schon aktuell · Stand …“ oder „Aktualisiert · Stand … · n neue Einträge“. Dasselbe passiert still, wenn
+meldet „Kein neuer Stand vom Mac · zuletzt veröffentlicht …“ oder „Aktualisiert · veröffentlicht … · n neue
+Einträge“. ↻ holt nur, was der Mac veröffentlicht hat – neue Repos, Module, Präsentationen und Simulationen
+veröffentlicht der **Portal-Wächter** am Mac alle 20 Minuten von selbst (`_Portal-Setup/portal-waechter.py`, seit
+04.10.2026 auch für Dashboard Mobil; Ruhezeit 5 min in den drei Quellordnern). Dasselbe passiert still, wenn
 die App wieder in den Vordergrund kommt (frühestens eine Minute nach der letzten Prüfung) oder das Netz
 zurückkehrt; beim Start mit gespeicherter Sitzung wird der Build ohnehin abgeglichen. Wurde der Tresor neu
 verschlüsselt (neues Passwort, `--neu-verschluesseln`), führt ↻ zur Anmeldung. ↻ prüft außerdem, ob es eine neue
@@ -75,7 +78,11 @@ Pfade nach Konvention neben der Quelle `simulationen` (KI-Ordner), sonst in `zug
 /usr/bin/python3 build.py --liste                 # zeigen, was gefunden würde
 ```
 
-Bequemer: Doppelklick auf `KI/Dashboard Mobil/Dashboard Mobil veröffentlichen.command`.
+Bequemer: Doppelklick auf `KI/Dashboard Mobil/Dashboard Mobil veröffentlichen.command`. Automatisch: der
+**Portal-Wächter** (`_Portal-Setup/portal-waechter.py`, launchd alle 20 min) ruft `veroeffentlichen.py --pruefen`
+auf und veröffentlicht bei `OFFEN` selbst – auch eine geänderte Repo-Liste; `gh` findet `build.py` dafür auch
+ohne Homebrew im PATH (`/opt/homebrew/bin/gh`). Push-Daten der Portale (`repos.portale`) zählen nicht als
+Änderung, sonst zöge jede Journal-Mobil-Veröffentlichung einen neuen Dashboard-Build nach sich.
 
 ## Zugänge
 
@@ -122,7 +129,7 @@ mit „angemeldet bleiben“ merkt er ihn in IndexedDB (sonst nur im Speicher �
 leitet `d/…` zur Anmeldung um und danach wieder zurück).
 
 Prüfen: `/usr/bin/python3 werkzeuge/pruefen.py [--geraet iphone|ipad|mac|alle] [--url …]` (Anmeldung
-falsch/richtig, Startseite mit Rechnern und Kacheln, Knopf ↻ „Schon aktuell“, GitHub mit Suche/Filter/QR, Präsentation
+falsch/richtig, Startseite mit Rechnern und Kacheln, Knopf ↻ „Kein neuer Stand vom Mac“, GitHub mit Suche/Filter/QR, Präsentation
 mit Touch-Leiste, Lerndashboard mit Suche und Verknüpfung `?d=…#/2/1`, Simulationen mit Klassen-Filter und mehrteiliger
 Simulation über den Service Worker, Rückwege, Abmelden; Prüfbilder in `Pruefbilder/`). Ohne `zugangsdaten.json`
 (Arbeitskopie) kommt das Passwort aus der Umgebungsvariable `DM_PASSWORT`.

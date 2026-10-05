@@ -5,7 +5,7 @@ pruefung_safari.py — Dashboard Mobil · Knopf ↻ in Safari (WebKit – diesel
 =====================================================================================================================
 
 Steuert Safari am Mac über safaridriver (WebDriver, nur Standardbibliothek) und spielt dasselbe durch wie
-werkzeuge/pruefung_refresh.py in Chrome: Anmeldung, ↻ ohne Änderung („Schon aktuell“), simulierte
+werkzeuge/pruefung_refresh.py in Chrome: Anmeldung, ↻ ohne Änderung („Kein neuer Stand vom Mac“), simulierte
 Veröffentlichung in einer Temp-Kopie von docs/ → ↻ („Aktualisiert … 2 neue Einträge“, Stand neu, Eintrag in der
 Liste, Repo-Zahl +1, Service-Worker-Cache ohne ?t=), stille Aktualisierung (Ereignisse „online“ und
 „visibilitychange“), Neustart mit gespeicherter Sitzung, Tresor neu verschlüsselt → Anmeldung.
@@ -267,8 +267,8 @@ def main():
 
         # 1) ↻ ohne Änderung
         sf.js("document.getElementById('knopf-aktualisieren').click()")
-        t = toast_mit('Schon aktuell')
-        melde('↻ ohne Änderung → „Schon aktuell“', 'Schon aktuell' in t and sf.js("return document.getElementById('kopf-stand').textContent") == stand0, t)
+        t = toast_mit('Kein neuer Stand')
+        melde('↻ ohne Änderung → „Kein neuer Stand vom Mac“', 'Kein neuer Stand' in t and sf.js("return document.getElementById('kopf-stand').textContent") == stand0, t)
         knopf_frei()
         js_fehler('(Schon aktuell)')
         time.sleep(4.5)
@@ -292,7 +292,7 @@ def main():
         drin = sf.js("return [...document.querySelectorAll('#liste-simulationen .z-titel')].some(z => z.textContent.indexOf('Prüfung Refresh') >= 0)")
         melde('Neue Simulation steht in der Liste', bool(drin), sf.js("return document.getElementById('info-simulationen').textContent"))
         sf.bild(bilder / 'safari-02-aktualisiert.png')
-        schluessel = sf.js_async("var cb=arguments[arguments.length-1]; caches.open('dm-v2').then(c=>c.keys()).then(ks=>cb(ks.map(k=>k.url))).catch(e=>cb(['Fehler '+e]));") or []
+        schluessel = sf.js_async("var cb=arguments[arguments.length-1]; caches.keys().then(ns=>Promise.all(ns.filter(n=>n.startsWith('dm-')).map(n=>caches.open(n).then(c=>c.keys())))).then(l=>cb(l.flat().map(k=>k.url))).catch(e=>cb(['Fehler '+e]));") or []
         mit_zusatz = [u for u in schluessel if '?' in u]
         melde('Service-Worker-Cache ohne ?t=-Einträge', not mit_zusatz and any(u.endswith('/vaults/index.json') for u in schluessel),
               f'{len(schluessel)} Einträge' + (', mit Zusatz: ' + ', '.join(mit_zusatz[:3]) if mit_zusatz else ''))
@@ -338,8 +338,8 @@ def main():
         build = json.loads((docs / 'vaults' / 'index.json').read_text())['build']
         melde('Neustart: Build der Sitzung gespeichert', bool(sf.js(f"return JSON.parse(localStorage.getItem('dm_sitzung')).build === {json.dumps(build)}")))
         sf.js("document.getElementById('knopf-aktualisieren').click()")
-        t = toast_mit('Schon aktuell')
-        melde('Nach Neustart ↻ → „Schon aktuell“', 'Schon aktuell' in t, t)
+        t = toast_mit('Kein neuer Stand')
+        melde('Nach Neustart ↻ → „Kein neuer Stand vom Mac“', 'Kein neuer Stand' in t, t)
         knopf_frei()
         js_fehler('(Neustart)')
         time.sleep(4.5)

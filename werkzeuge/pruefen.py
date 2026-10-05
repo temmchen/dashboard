@@ -290,7 +290,7 @@ def main():
                 stand_vorher = cdp.js("document.getElementById('kopf-stand').textContent")
                 cdp.js("document.getElementById('knopf-aktualisieren').click()", warten=False)
                 hinweis = cdp.warte_bis("(function(){var t=document.getElementById('toast'); return t.classList.contains('zeig') ? t.textContent : ''})()", frist=15)
-                melde('Knopf ↻ meldet „Schon aktuell“', 'Schon aktuell' in hinweis and cdp.js("document.getElementById('kopf-stand').textContent") == stand_vorher, hinweis)
+                melde('Knopf ↻ meldet „Kein neuer Stand vom Mac“', 'Kein neuer Stand' in hinweis and cdp.js("document.getElementById('kopf-stand').textContent") == stand_vorher, hinweis)
                 cdp.bild(bilder / f'{g}-01c-aktualisieren.png')
                 cdp.warte_bis("!document.getElementById('knopf-aktualisieren').disabled", frist=10)
                 js_fehler('Aktualisieren')

@@ -94,7 +94,7 @@ def inventar(cfg, mit_repos=True):
         for q in dateien:
             if q.is_file():
                 inv[f"@journal/{q.relative_to(j).as_posix()}"] = stat_von(q)
-    inv["@repos"] = B.repos_signatur(B.eigenes_repo(cfg)) if mit_repos else None
+    inv["@repos"] = B.repos_signatur(B.eigenes_repo(cfg), (cfg.get("repos") or {}).get("portale")) if mit_repos else None
     return inv, manifest
 
 
