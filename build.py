@@ -28,6 +28,8 @@ Was aufgenommen wird (`quellen` in zugangsdaten.json):
   * Repos: `gh api user/repos` (alle eigenen, auch private), Pages-Adresse nach Konvention
     https://<benutzer>.github.io/<repo>/, QR-Code als Modulraster.
   * Rechner (`rechner` in zugangsdaten.json): die Schnellknöpfe oben auf der Startseite, mit QR.
+  * Kameras (`kameras` in zugangsdaten.json, seit 13.10.2026): Karte ganz oben mit EINEM Knopf zur Kameraseite über
+    den Heimzugang des Netzwächters (WLAN zu Hause, Link mit Schlüssel) – nur im Tresor, nie im Klartext.
   * Zuordnung zu Klassen und Modulen (seit 05.10.2026): lokale Simulationen aus `zuordnung.json` im
     Ordner (tiefere gewinnt), GitHub-Simulationen aus `Simulations-Filemanager/zuordnungen.json`
     (Schlüssel `@github/<repo>`) – beides pflegt der Simulations-Filemanager (in Dashboard Pro die
@@ -657,6 +659,15 @@ def rechner_liste(cfg: dict):
     return aus
 
 
+def kameras_links(cfg: dict):
+    """Kameras-Karte der Startseite (zugangsdaten.json → `kameras`: {titel, adresse}) oder None. Eine Adresse:
+    der Heimzugang im WLAN (Toms Wunsch 13.10.2026: keine zwei Links)."""
+    k = cfg.get("kameras")
+    if not isinstance(k, dict) or not k.get("adresse"):
+        return None
+    return {"titel": str(k.get("titel") or "Kameras"), "adresse": str(k["adresse"])}
+
+
 # ─────────────────────────── Alles einsammeln ───────────────────────────────
 
 def sammle(cfg: dict):
@@ -772,6 +783,7 @@ def main():
         print(f"Zuordnung: {len(zentral)} GitHub-Zuordnung(en) · "
               f"{len(manifest['klassenliste'].get('klassen') or [])} Klassen aus dem Journal")
     manifest["rechner"] = rechner_liste(cfg)
+    manifest["kameras"] = kameras_links(cfg)
 
     vdir = VAULTS / vid
     (vdir / "f").mkdir(parents=True, exist_ok=True)

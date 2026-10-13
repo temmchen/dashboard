@@ -82,6 +82,7 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
 .rechner .r-knoepfe{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
 .rechner .r-knoepfe a,.rechner .r-knoepfe button{flex:1 1 90px;min-height:42px;padding:0 10px;border-radius:11px;border:1px solid var(--line2);background:var(--card2);color:var(--tx);
   font-weight:650;font-size:14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.rechner .kam-kachel{grid-column:1/-1;border-top-color:#0EA5E9}
 .rechner .r-knoepfe .primaer{background:var(--gelb);color:#2a1e00;border-color:transparent}
 .kacheln{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .kachel{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px 14px;min-height:132px;cursor:pointer;color:var(--tx);
@@ -237,6 +238,8 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
   <main>
     <!-- Startseite -->
     <section class="ansicht" id="ansicht-start">
+      <h2 id="kameras-h" hidden>Kameras</h2>
+      <div class="rechner" id="kameras-start"></div>
       <h2>Rechner</h2>
       <div class="rechner" id="rechner"></div>
       <h2>Bereiche</h2>
@@ -592,6 +595,14 @@ function naechste(e){
   return { kommend, letzte, heute: !!(kommend && kommend.datum === heute) };
 }
 function renderStart(){
+  /* Kameras (13.10.2026): ein Knopf, direkt über das Heimnetz (Heimzugang des Netzwächters, ohne Tailscale) */
+  const kam = M && M.kameras && typeof M.kameras === "object" && M.kameras.adresse ? M.kameras : null;
+  $("#kameras-h").hidden = !kam;
+  $("#kameras-start").innerHTML = kam ? `<div class="r-kachel kam-kachel">
+      <div class="r-titel">📹 ${esc(kam.titel || "Kameras")}</div>
+      <div class="r-adresse">Livebild direkt über das WLAN zu Hause</div>
+      <div class="r-knoepfe"><a class="primaer" href="${esc(kam.adresse)}" target="_blank" rel="noopener">Kameras öffnen ↗</a></div>
+    </div>` : "";
   $("#rechner").innerHTML = rechner().map((r, i) => `<div class="r-kachel">
       <div class="r-titel">${esc(r.titel)}</div>
       <div class="r-adresse">${esc(String(r.adresse).replace(/^https?:\/\//, ""))}</div>
