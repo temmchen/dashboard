@@ -43,6 +43,11 @@ def sag(text=""):
     print(text, flush=True)
 
 
+def nfc(text):
+    """Inventar-Schlüssel in Unicode-NFC – der zweite Mac liefert Akzent-Namen als NFD (siehe build.nfc)."""
+    return unicodedata.normalize("NFC", text) if isinstance(text, str) else text
+
+
 def git(*args, fehler_ok=False):
     r = subprocess.run(["git", "-C", str(HIER)] + list(args), capture_output=True, text=True)
     if r.returncode != 0 and not fehler_ok:
@@ -62,7 +67,7 @@ def inventar(cfg, mit_repos=True):
     manifest, jobs, _ = B.sammle(cfg)
     inv = {}
     for schluessel, p, _e, _rel in jobs:
-        inv[schluessel] = stat_von(p)
+        inv[nfc(schluessel)] = stat_von(p)
     for bereich, quelle in B.quellen(cfg).items():
         if not quelle.is_dir():
             continue
@@ -76,7 +81,7 @@ def inventar(cfg, mit_repos=True):
             for name in BEGLEITER:
                 p = ordner / name
                 if p.is_file():
-                    inv[f"{bereich}/{ordner.relative_to(quelle).as_posix()}/{name}"] = stat_von(p)
+                    inv[nfc(f"{bereich}/{ordner.relative_to(quelle).as_posix()}/{name}")] = stat_von(p)
     # Zuordnungen (Simulations-Filemanager) und Journal-Klassen fließen in den Build ein – Änderungen dort
     # müssen ebenfalls eine Veröffentlichung auslösen.
     pf = B.zuordnung_pfade(cfg)
@@ -93,7 +98,7 @@ def inventar(cfg, mit_repos=True):
             pass
         for q in dateien:
             if q.is_file():
-                inv[f"@journal/{q.relative_to(j).as_posix()}"] = stat_von(q)
+                inv[nfc(f"@journal/{q.relative_to(j).as_posix()}")] = stat_von(q)
     inv["@repos"] = B.repos_signatur(B.eigenes_repo(cfg), (cfg.get("repos") or {}).get("portale")) if mit_repos else None
     return inv, manifest
 
@@ -163,7 +168,7 @@ def main():
             stand_alt = json.loads(STAND.read_text(encoding="utf-8"))
         except Exception:
             stand_alt = {}
-    alt = stand_alt.get("inventar", {})
+    alt = {nfc(k): w for k, w in (stand_alt.get("inventar") or {}).items()}   # alter Stand ggf. NFD
 
     # --pruefen: nur nachsehen, nichts anfassen (Portal-Wächter)
     if "--pruefen" in sys.argv:

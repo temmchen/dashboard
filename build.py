@@ -103,6 +103,37 @@ def b64(daten: bytes) -> str:
     return base64.b64encode(daten).decode("ascii")
 
 
+def nfc(text):
+    """Unicode-Normalform C. Der zweite Mac (iCloud/OneDrive) liefert Dateinamen mit Akzenten
+    zerlegt (NFD: „e“ + Akzent), dieser Mac zusammengesetzt (NFC) – gleicher Name, andere Bytes.
+    Ohne Angleichung gälten die Dateien dort jedes Mal als neu (Neuverschlüsselung, Commit-Pingpong,
+    siehe 14./15.10.2026). Darum: alle Schlüssel, Pfade und Anzeigetexte in NFC."""
+    return unicodedata.normalize("NFC", text) if isinstance(text, str) else text
+
+
+def nfc_in_place(obj):
+    """NFC für alle Zeichenketten in verschachtelten dict/list – an Ort und Stelle (auch Schlüssel),
+    damit Verweise auf dieselben Einträge (manifest ↔ jobs) erhalten bleiben."""
+    if isinstance(obj, dict):
+        for k in list(obj.keys()):
+            v = obj[k]
+            nk = nfc(k)
+            if isinstance(v, str):
+                v = nfc(v)
+            else:
+                nfc_in_place(v)
+            if nk != k:
+                del obj[k]
+            obj[nk] = v
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            if isinstance(v, str):
+                obj[i] = nfc(v)
+            else:
+                nfc_in_place(v)
+    return obj
+
+
 def normalisiere_passwort(passwort) -> str:
     """Wie im Browser (docs/index.html): NFC, Enden trimmen, Kleinschreibung."""
     return unicodedata.normalize("NFC", str(passwort or "")).strip().lower()
@@ -689,6 +720,11 @@ def sammle(cfg: dict):
         jobs.extend(j)
         uebersprungen.extend(u)
     manifest = {"v": 2, "portal": PORTAL_ID, "schuljahr": cfg.get("schuljahr") or "", "bereiche": bereiche}
+    # NFC auf beiden Macs gleich (siehe nfc()): Einträge in place, Schlüssel/rel der Jobs neu gebildet –
+    # die Eintrags-Objekte in den Jobs bleiben dieselben wie im Manifest.
+    nfc_in_place(manifest)
+    jobs = [(nfc(schluessel), p, e, nfc(rel)) for schluessel, p, e, rel in jobs]
+    uebersprungen = [nfc(u) for u in uebersprungen]
     return manifest, jobs, uebersprungen
 
 
@@ -749,7 +785,8 @@ def main():
     alt = {"vaults": {}, "dateien": {}, "repos": {}}
     try:
         d = json.loads(BUILD_STATE.read_text(encoding="utf-8"))
-        alt = {"vaults": d.get("vaults", {}), "dateien": d.get("dateien", {}), "repos": d.get("repos", {})}
+        alt = {"vaults": d.get("vaults", {}), "dateien": {nfc(k): v for k, v in (d.get("dateien") or {}).items()},   # alter Stand ggf. NFD
+               "repos": d.get("repos", {})}
     except Exception:
         pass
     if frisch:
