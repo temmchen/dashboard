@@ -1,0 +1,31 @@
+{
+ "v": 2,
+ "portal": "dashboard-mobil",
+ "schuljahr": "2026 – 2027",
+ "erstellt": "2026-10-20T17:26:54",
+ "build": "b9cf72eb94bd",
+ "kdf": {
+  "typ": "PBKDF2-SHA256",
+  "iter": 600000,
+  "normalisierung": "nfc+trim+lower"
+ },
+ "principals": [
+  {
+   "id": "p0",
+   "salt": "04FM1SYhTI023wAN9hVmvg=="
+  }
+ ],
+ "vaults": [
+  {
+   "id": "b6ba2a86af72d9b8",
+   "wraps": [
+    {
+     "iv": "cNPwMIhoSZuiGPy+",
+     "ct": "bhzLSlnCWEVNmSpCRVpRxtOB7hVlGBp1tH1xUS2mgbUXd/PR31V+hrzUrMwR9E/2okLWREGJmk27R/WSQWQnp3wmRnn3+CTpUf2m78sEpc3o9k9zT/NBYEyVKZxhUrDErC+O4pdXhQ==",
+     "p": "p0"
+    }
+   ],
+   "manifest": "vaults/b6ba2a86af72d9b8/m.enc"
+  }
+ ]
+}
