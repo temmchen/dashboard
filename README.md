@@ -47,6 +47,25 @@ verschlüsselt (neues Passwort, `--neu-verschluesseln`), führt ↻ zur Anmeldun
 Fassung der App selbst (index.html, sw.js) gibt, und lädt die Seite dann einmal neu – eine Web-App auf dem
 Home-Bildschirm bleibt sonst tagelang bei der alten Fassung.
 
+## Todo (seit 24.10.2026)
+
+Ganz oben auf der Startseite steht ein Block **Todo**: Zähler als farbige Pillen („2 überfällig“ rot · „3 heute“
+orange · „5 diese Woche“ · „12 offen“), darunter die nächsten fünf Aufgaben (Streifen und Pille in der
+Bereichsfarbe, Art-Symbol, Titel, Klasse/Fach, Fälligkeit „heute“, „morgen“, „Mo 27.10.“, „überfällig seit 2 Tagen“)
+und „Alle anzeigen“. Die eigene Ansicht **Todo** (`…/dashboard/?b=todo`, „‹ Start“ zurück) hat oben eine Suche (Titel,
+Notiz, Klasse, Fach, Tags), Filter-Chips je Bereich (Privat, CdM, Promotion, LTEtt – Mehrfachauswahl, gemerkt im Gerät
+unter `localStorage` `dm-todo-filter`) und die Gruppen Überfällig · Heute · Morgen · Diese Woche (bis Sonntag) · Später ·
+Ohne Datum. Karten: linker Streifen in Bereichsfarbe, ‼ bei Priorität hoch, Status „In Arbeit“/„Wartet“, Schritte
+„☑ 2/5“ (erledigt/gesamt), Tippen klappt die Notiz auf. iPad (ab 740 px): Suche und Filter links, Liste rechts;
+auf der Startseite die nächsten Aufgaben zweispaltig.
+
+| | |
+| --- | --- |
+| **Quelle** | `KI/Todo/daten/todos.json` und `KI/Todo/kategorien.json` der Todo-App am Mac (Ordner nach Konvention neben der Quelle `simulationen`; sonst `zugangsdaten.json` → `todo`; für Testläufe Umgebungsvariable `DM_TODO` = Ordner mit einer Kopie). `daten/sicherungen/` wird nicht gelesen. |
+| **Manifest** | Feld `todo`: `{stand, bereiche:[{id,name,kurz,farbe,symbol}], arten:{id:{name,symbol}}, aufgaben:[…]}` – nur nicht erledigte Aufgaben mit `id, titel, notiz` (max. 300 Zeichen), `bereich, unter, fach, art, prio, faellig, status, tags, schritte:{offen,gesamt}`, sortiert nach Fälligkeit (ohne Datum zuletzt), dann Priorität. Fehlt todos.json: `todo: null`, der Block entfällt. |
+| **Nur lesen** | Das Handy ändert nichts – kein Abhaken, kein Zurückschreiben. Aufgaben pflegt die Todo-App am Mac. |
+| **Veröffentlichung** | `veroeffentlichen.py` nimmt `todo/todos.json` und `todo/kategorien.json` ins Inventar; eine Änderung macht `--pruefen` zu `OFFEN`, der **Portal-Wächter** veröffentlicht beim nächsten Lauf (alle 20 min). Sofort: Knopf „Mobil veröffentlichen“ der Todo-App (`POST /api/mobil`) oder `Dashboard Mobil veröffentlichen.command`; danach am Gerät ↻. Die Klartext-Prüfung sucht Titel und Notizen offener Aufgaben in `docs/` (außer im App-Code `index.html`/`sw.js`). |
+
 ## Zuordnung zu Klassen und Fächern (seit 05.10.2026)
 
 Jede Simulation trägt unter dem Titel ihre **Zuordnung** (Klasse · Fach/Modul) als Chips – dieselbe Zuordnung,
@@ -103,7 +122,7 @@ iPhone-Tastatur darf also groß schreiben.
 
 ```
 dashboard/
-├── build.py                    sammelt KI/Keynotes, KI/Lerndashboards, KI/Simulations + Repo-Liste (gh) → docs/vaults/
+├── build.py                    sammelt KI/Keynotes, KI/Lerndashboards, KI/Simulations, KI/Todo + Repo-Liste (gh) → docs/vaults/
 ├── veroeffentlichen.py         Ein-Klick-Veröffentlichung, --pruefen für den Wächter, Klartext-Prüfung
 ├── verwaltung.py               Zugänge, Passwörter, Passwort-Übersicht + QR
 ├── zugangsdaten.beispiel.json  Vorlage ohne echtes Passwort
@@ -114,7 +133,7 @@ dashboard/
 │   ├── webkit_treiber.swift    WKWebView als Prüf-Browser für pruefung_safari.py --wkwebview (swiftc)
 │   └── symbole.py              zeichnet die App-Symbole (PNG) neu
 └── docs/                       GitHub-Pages-Wurzel
-    ├── index.html              Web-App: Anmeldung, Startseite (Rechner, Kacheln), vier Bereiche mit Suche/Filtern, Aktualisieren ↻, Entschlüsseln, Übergabe
+    ├── index.html              Web-App: Anmeldung, Startseite (Todo, Kameras, Rechner, Kacheln), vier Bereiche + Todo mit Suche/Filtern, Aktualisieren ↻, Entschlüsseln, Übergabe
     ├── sw.js                   Service Worker: App-Hülle + Tresordateien offline, d/<Kennung>/… entschlüsselt ausliefern
     ├── manifest.webmanifest, icons/
     └── vaults/                 index.json (Salts, eingewickelte Schlüssel) + <id>/m.enc + <id>/f/<id>.enc

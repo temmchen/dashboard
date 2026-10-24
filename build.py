@@ -37,6 +37,10 @@ Was aufgenommen wird (`quellen` in zugangsdaten.json):
     (`manifest.klassenliste`), damit das Handy im Zuordnungs-Editor dieselben Chips anbietet.
     Pfade nach Konvention neben der Quelle „simulationen“ (KI-Ordner) oder in zugangsdaten.json
     → `zuordnung`: {"modul": …/zuordnung.py, "zentral": …/zuordnungen.json, "journal": …/Journal de Classe}.
+  * Todo (seit 24.10.2026): die offenen Aufgaben der Todo-App (`KI/Todo/daten/todos.json` + `kategorien.json`) als
+    Manifest-Feld `todo` – nur lesend, das Handy schreibt nichts zurück. Ordner nach Konvention neben der Quelle
+    „simulationen“ (KI/Todo), sonst zugangsdaten.json → `todo` (Ordner) bzw. für Testläufe die Umgebungsvariable
+    DM_TODO (Ordner mit daten/todos.json und kategorien.json). Fehlt todos.json → `todo: null`.
 
 Krypto-Design (muss zu docs/index.html und docs/sw.js passen — wie Journal Mobil,
 Schuljahr- und CdM-Portal):
@@ -55,6 +59,7 @@ import base64
 import datetime
 import importlib.util
 import json
+import os
 import re
 import secrets
 import shutil
@@ -699,6 +704,79 @@ def kameras_links(cfg: dict):
     return {"titel": str(k.get("titel") or "Kameras"), "adresse": str(k["adresse"])}
 
 
+# ─────────────────────────── Todo (seit 24.10.2026) ─────────────────────────
+# Nur lesen: die Todo-App am Mac (KI/Todo, server.py) pflegt todos.json; aufs Handy kommen die offenen
+# Aufgaben ohne Verlauf (erledigt_am, erstellt, vorlagen) und ohne Schritt-Texte.
+
+TODO_PRIO = {"hoch": 0, "normal": 1, "niedrig": 2}
+TODO_STATUS = ("offen", "aktiv", "wartet")
+TODO_NOTIZ_MAX = 300
+
+
+def todo_pfade(cfg: dict):
+    """{daten: …/todos.json, kategorien: …/kategorien.json} oder None. Ordner: Umgebungsvariable DM_TODO
+    (Testläufe mit einer Kopie) › zugangsdaten.json → `todo` › Konvention KI/Todo. Die config.json der
+    Todo-App darf andere Dateinamen nennen („daten“, „kategorien“, relativ zum Ordner).
+    Bewusst NICHT daten/sicherungen/ – dort legt die App bei jedem Speichern eine Kopie ab."""
+    roh = os.environ.get("DM_TODO") or cfg.get("todo")
+    if isinstance(roh, dict):
+        roh = roh.get("ordner")
+    if roh:
+        ordner = Path(str(roh)).expanduser()
+    else:
+        ki = ki_ordner(cfg)
+        if not ki:
+            return None
+        ordner = ki / "Todo"
+    tcfg = json_lesen(ordner / "config.json", "Todo/config.json")
+    tcfg = tcfg if isinstance(tcfg, dict) else {}
+    return {"daten": ordner / str(tcfg.get("daten") or "daten/todos.json"),
+            "kategorien": ordner / str(tcfg.get("kategorien") or "kategorien.json")}
+
+
+def sammle_todo(cfg: dict):
+    """Manifest-Feld `todo`: {stand, bereiche:[{id,name,kurz,farbe,symbol}], arten:{id:{name,symbol}}, aufgaben:[…]}
+    mit allen nicht erledigten Aufgaben, sortiert nach Fälligkeit (ohne Datum zuletzt), dann Priorität.
+    None, wenn todos.json fehlt."""
+    pf = todo_pfade(cfg)
+    if not pf or not pf["daten"].is_file():
+        return None
+    d = json_lesen(pf["daten"], "todos.json")
+    k = json_lesen(pf["kategorien"], "kategorien.json")
+    if not isinstance(d, dict):
+        return None
+    k = k if isinstance(k, dict) else {}
+    bereiche = [{"id": str(b["id"]), "name": str(b.get("name") or b["id"]), "kurz": str(b.get("kurz") or b.get("name") or b["id"]),
+                 "farbe": str(b.get("farbe") or ""), "symbol": str(b.get("symbol") or "")}
+                for b in (k.get("bereiche") or []) if isinstance(b, dict) and b.get("id")]
+    arten = {str(a["id"]): {"name": str(a.get("name") or a["id"]), "symbol": str(a.get("symbol") or "")}
+             for a in (k.get("arten") or []) if isinstance(a, dict) and a.get("id")}
+    aufgaben = []
+    for a in d.get("aufgaben") or []:
+        if not isinstance(a, dict) or not str(a.get("titel") or "").strip():
+            continue
+        status = str(a.get("status") or "offen")
+        if status == "erledigt":
+            continue
+        faellig = str(a.get("faellig") or "")[:10]
+        notiz = str(a.get("notiz") or "").strip()
+        if len(notiz) > TODO_NOTIZ_MAX:
+            notiz = notiz[:TODO_NOTIZ_MAX - 1].rstrip() + "…"
+        schritte = [s for s in (a.get("schritte") or []) if isinstance(s, dict)]
+        aufgaben.append({
+            "id": str(a.get("id") or ""), "titel": str(a["titel"]).strip(), "notiz": notiz,
+            "bereich": str(a.get("bereich") or ""), "unter": str(a.get("unter") or ""), "fach": str(a.get("fach") or ""),
+            "art": str(a.get("art") or ""),
+            "prio": a.get("prio") if a.get("prio") in TODO_PRIO else "normal",
+            "faellig": faellig if re.match(r"^\d{4}-\d{2}-\d{2}$", faellig) else None,
+            "status": status if status in TODO_STATUS else "offen",
+            "tags": [str(t) for t in (a.get("tags") or []) if str(t).strip()],
+            "schritte": {"offen": sum(1 for s in schritte if not s.get("ok")), "gesamt": len(schritte)},
+        })
+    aufgaben.sort(key=lambda a: (a["faellig"] is None, a["faellig"] or "", TODO_PRIO[a["prio"]], a["titel"].lower()))
+    return {"stand": str(d.get("geaendert") or ""), "bereiche": bereiche, "arten": arten, "aufgaben": aufgaben}
+
+
 # ─────────────────────────── Alles einsammeln ───────────────────────────────
 
 def sammle(cfg: dict):
@@ -719,7 +797,8 @@ def sammle(cfg: dict):
         bereiche[bereich] = e
         jobs.extend(j)
         uebersprungen.extend(u)
-    manifest = {"v": 2, "portal": PORTAL_ID, "schuljahr": cfg.get("schuljahr") or "", "bereiche": bereiche}
+    manifest = {"v": 2, "portal": PORTAL_ID, "schuljahr": cfg.get("schuljahr") or "", "bereiche": bereiche,
+                "todo": sammle_todo(cfg)}
     # NFC auf beiden Macs gleich (siehe nfc()): Einträge in place, Schlüssel/rel der Jobs neu gebildet –
     # die Eintrags-Objekte in den Jobs bleiben dieselben wie im Manifest.
     nfc_in_place(manifest)
@@ -755,6 +834,8 @@ def main():
                 else:
                     n = sum(1 for j in jobs if j[2] is e)
                     print(f"  🔒 {e['id']:44s} {e['titel']}  ({n} Datei{'en' if n != 1 else ''}{', mehrteilig' if e['mehrteilig'] else ''})")
+        t = manifest.get("todo")
+        print(f"\n[todo]\n  {len(t['aufgaben'])} offene Aufgabe(n), Stand {t['stand']}" if t else "\n[todo]\n  – todos.json nicht gefunden")
         for u in uebersprungen:
             print(f"  – übersprungen: {u}")
         return
@@ -875,6 +956,7 @@ def main():
         **anzahl,
         "links": sum(1 for b in BEREICHE for e in manifest["bereiche"][b] if e["typ"] == "link"),
         "repos": len(repos.get("liste") or []),
+        "todo": len((manifest.get("todo") or {}).get("aufgaben") or []),
         "dateien": len(neu["dateien"]),
         "bytes": gesamt,
         "uebersprungen": uebersprungen,
@@ -909,6 +991,7 @@ def main():
           f"{zaehler['wiederverwendet']} unverändert übernommen.")
     print(f"Inhalt: {st['lerndashboards']} Lerndashboards · {st['praesentationen']} Präsentationen · "
           f"{st['simulationen']} Simulationen · {st['links']} Links · {st['repos']} Repos · "
+          f"{st['todo']} offene Aufgaben{'' if manifest.get('todo') else ' (keine todos.json)'} · "
           f"{st['dateien']} Dateien · {gesamt / 1024 / 1024:.1f} MiB")
     for b in BEREICHE:
         for e in manifest["bereiche"][b]:

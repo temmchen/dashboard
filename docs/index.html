@@ -179,6 +179,67 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
 .fuss{color:var(--tx3);font-size:12.5px;margin-top:28px;line-height:1.55}
 .fuss kbd{font:inherit;color:var(--tx2)}
 
+/* ═══════════════════════ Todo (seit 24.10.2026) ═══════════════════════
+   Nur lesen. Bereichsfarben (kategorien.json der Todo-App) als Streifen und Pillen; Pillen etwas
+   abgedunkelt, damit weiße Schrift lesbar bleibt. iPad (ab 740 px): Suche/Filter links, Liste rechts. */
+.todo-block{background:var(--card);border:1px solid var(--line);border-top:4px solid #f97316;border-radius:var(--radius);padding:12px 12px 10px}
+.todo-pillen{display:flex;flex-wrap:wrap;gap:6px}
+.tpill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700;color:#fff;
+  background:color-mix(in srgb,var(--pf,#475569) 84%,#000);white-space:nowrap;line-height:1.35}
+.tpill.ueber{--pf:#dc2626}.tpill.heute{--pf:#ea580c}.tpill.woche{--pf:#0284c7}.tpill.offen{--pf:#64748b}
+.tpill.klein{font-size:12px;font-weight:650;padding:1px 8px}
+.tpill.hohl{background:transparent;color:var(--tx);border:1px solid var(--line2);font-weight:600}
+.tpill.tstatus{background:transparent;color:var(--gelb);border:1px solid color-mix(in srgb,var(--gelb) 45%,transparent);font-weight:600}
+.todo-naechste{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.todo-zeile{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--tf,var(--grau));
+  border-radius:12px;padding:9px 12px;color:var(--tx);cursor:pointer;min-height:52px}
+.todo-zeile:active{background:var(--line)}
+.tz-art{flex:none;width:24px;text-align:center;font-size:17px}
+.tz-mitte{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.tz-titel{font-weight:650;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tz-meta{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.tz-faellig{margin-left:auto;padding-left:6px;font-size:13px;font-weight:650;color:var(--tx2);white-space:nowrap}
+.f-ueber{color:var(--rot)!important}.f-heute{color:#fb923c!important}.f-morgen{color:var(--gelb)!important}
+.prio-hoch{color:#ef4444;font-weight:900;margin-right:4px}
+.todo-alle{display:flex;justify-content:center;align-items:center;width:100%;min-height:42px;margin-top:8px;border-radius:11px;border:1px solid var(--line2);
+  background:transparent;color:var(--acc);font-weight:650;font-size:14px;cursor:pointer}
+.todo-leer{color:var(--tx2);font-size:14px;padding:10px 2px 4px}
+.todo-seite .todo-pillen{margin-top:10px}
+.chip.tchip{border-color:color-mix(in srgb,var(--cf) 60%,var(--line2));color:var(--tx)}
+.chip.tchip .tp{width:9px;height:9px;border-radius:50%;background:var(--cf);flex:none}
+.chip.tchip.an{background:color-mix(in srgb,var(--cf) 84%,#000);color:#fff;border-color:transparent}
+.chip.tchip.an .tp{background:#fff}
+.todo-hinweis{color:var(--tx3);font-size:12.5px;line-height:1.45;margin-top:12px}
+.todo-hinweis kbd{font:inherit;color:var(--tx2)}
+.todo-liste{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.todo-liste .gruppe .n{opacity:.7;font-weight:600;margin-left:4px}
+.gruppe.g-ueber{color:var(--rot)}.gruppe.g-heute{color:#fb923c}
+.todo-karte{position:relative;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--tf,var(--grau));border-radius:14px;padding:11px 14px 11px 12px}
+.todo-karte.mit-notiz{cursor:pointer}
+.tk-kopf{display:flex;align-items:flex-start;gap:10px}
+.tk-art{flex:none;width:24px;text-align:center;font-size:18px;line-height:1.3}
+.tk-titel{flex:1;min-width:0;font-weight:700;font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+.todo-karte.niedrig .tk-titel{color:var(--tx2);font-weight:600}
+.tk-faellig{flex:none;font-size:13px;font-weight:650;color:var(--tx2);white-space:nowrap;line-height:1.6}
+.tk-meta{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:6px 0 0 34px;font-size:12.5px;color:var(--tx3)}
+.tk-meta .tag{color:var(--tx3)}
+.tk-notiz{display:none;margin:8px 0 0 34px;padding:9px 11px;border-radius:10px;background:var(--card2);color:var(--tx2);font-size:14px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.todo-karte.auf .tk-notiz{display:block}
+.tk-mehr{color:var(--tx3);font-size:12px;margin-left:auto}
+.tk-mehr .pf{display:inline-block;transition:transform .2s}
+.todo-karte.auf .tk-mehr .pf{transform:rotate(180deg)}
+@keyframes blink{0%,100%{box-shadow:0 0 0 0 transparent}40%{box-shadow:0 0 0 3px var(--acc)}}
+.todo-karte.hervor{animation:blink 1.4s ease 2}
+@media (min-width:740px){
+  .todo-block{padding:14px 16px 12px}
+  .todo-naechste{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .todo-raster{display:grid;grid-template-columns:minmax(240px,300px) 1fr;gap:20px;align-items:start}
+  .todo-seite{position:sticky;top:calc(env(safe-area-inset-top) + 10px)}
+  .todo-seite .suche{margin-top:4px}
+  .todo-liste{margin-top:0}
+  .todo-liste .gruppe:first-child{margin-top:4px}
+}
+
 /* QR-Vollbild */
 #qr{position:fixed;inset:0;z-index:120;background:rgba(3,5,10,.96);display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer}
 .qr-karte{background:#fff;color:#111;border-radius:22px;padding:22px;max-width:min(92vw,560px);width:100%;text-align:center}
@@ -238,6 +299,8 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
   <main>
     <!-- Startseite -->
     <section class="ansicht" id="ansicht-start">
+      <h2 id="todo-h" hidden>Todo</h2>
+      <div id="todo-start"></div>
       <h2 id="kameras-h" hidden>Kameras</h2>
       <div class="rechner" id="kameras-start"></div>
       <h2>Rechner</h2>
@@ -281,6 +344,20 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
       <div class="liste" id="liste-repos"></div>
     </section>
 
+    <!-- Todo (seit 24.10.2026): nur lesen – geändert wird in der Todo-App am Mac -->
+    <section class="ansicht versteckt" id="ansicht-todo">
+      <div class="bereich-kopf"><h2>Todo</h2><span class="bereich-info" id="info-todo"></span></div>
+      <div class="todo-raster">
+        <aside class="todo-seite">
+          <input class="suche" type="search" id="todo-suche" placeholder="Titel, Notiz, Klasse, Fach …" autocomplete="off" autocapitalize="off">
+          <div class="todo-pillen" id="todo-zaehler"></div>
+          <div class="chips" id="chips-todo"></div>
+          <div class="todo-hinweis">Nur zum Nachsehen: Aufgaben anlegen, abhaken und ändern in der Todo-App am Mac – der Portal-Wächter bringt den neuen Stand hierher, danach <kbd>↻</kbd>.</div>
+        </aside>
+        <div class="todo-liste" id="liste-todo"></div>
+      </div>
+    </section>
+
     <p class="fuss" id="fuss">Alle Inhalte liegen nur als AES-256-Chiffrat auf GitHub Pages und werden erst hier nach der Anmeldung entschlüsselt.
       In Dashboards und Präsentationen: Wischen blättert, Tippen zeigt die Bedienleiste; <kbd>‹ Dashboard</kbd> führt hierher zurück.
       <kbd>↻</kbd> oben holt, was der Mac zuletzt veröffentlicht hat; Neues veröffentlicht der Portal-Wächter am Mac alle 20 Minuten von selbst.
@@ -315,6 +392,7 @@ const KACHELN = {
   praesentationen:{ name: "Präsentationen", farbe: "var(--pink)", symbol: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M10 8l5 2.5-5 2.5z"/></svg>' },
   repos:          { name: "GitHub",         farbe: "var(--grau)", symbol: '<svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>' },
 };
+const ANSICHTEN = [...BEREICHE, "todo"];                          // Todo: eigene Ansicht, keine Kachel (Block oben auf der Startseite)
 const KLASSEN_MUSTER = [/DP ?[1-4] ?[A-Z]{2}/i, /\b[1-7] ?G[A-Z]{2,3} ?[A-Z]?\b/i, /Module ?[FM]\b/i];
 const FACH_MUSTER = [/ELTEC ?\d{1,2}/i, /MINT ?\d{1,2}/i, /DITEC ?\d{1,2}/i, /PRODI ?\d{1,2}/i, /ELETE/i, /TPELE/i, /OPXX ?\d?/i];
 
@@ -791,22 +869,145 @@ function renderRepos(){
   $("#info-repos").textContent = alle.length ? `${alle.length} Repos · ${alle.filter(r => r.privat).length} privat · ${alle.filter(r => r.pages).length} mit Webseite · Stand ${fmtStand(R.stand)}${R.fehler ? " · ⚠︎ " + R.fehler : ""}` : (R.fehler ? "⚠︎ " + R.fehler : "keine Repos im Tresor");
 }
 
+/* ─────────────────────────── Anzeige: Todo (seit 24.10.2026) ───────────────────────────
+   Nur lesen: Manifest-Feld `todo` aus KI/Todo (todos.json + kategorien.json), offene Aufgaben sortiert nach
+   Fälligkeit und Priorität. Filter je Bereich (Mehrfachauswahl, localStorage dm-todo-filter), Suche, Notiz
+   klappt beim Tippen auf. Das Gerät schreibt nichts zurück. */
+const TODO_FILTER_KEY = "dm-todo-filter";
+const TODO = { suche: "", filter: new Set(), offen: new Set() };
+try{ for(const b of JSON.parse(lsLesen(TODO_FILTER_KEY, "[]")) || []) TODO.filter.add(String(b)); }catch(e){}
+const TODO_STATUS = { aktiv: "In Arbeit", wartet: "Wartet" };
+function todo(){ return M && M.todo && typeof M.todo === "object" ? M.todo : null; }
+function todoAufgaben(){ const t = todo(); return t ? sichereListe(t.aufgaben) : []; }
+function todoBereich(id){
+  const b = todo() && sichereListe(todo().bereiche).find(x => x.id === id);
+  return b || { id, name: id || "Ohne Bereich", kurz: id || "–", farbe: "", symbol: "" };
+}
+function todoArt(id){ const a = todo() && todo().arten && todo().arten[id]; return a || { name: "", symbol: "•" }; }
+const todoFarbe = a => todoBereich(a.bereich).farbe || "#8b95a7";
+function tageBis(iso){ const d = ausIso(iso); if(!d) return null; const h = ausIso(heuteIso()); return Math.round((d - h) / 86400000); }
+function tageBisSonntag(){ return (7 - new Date().getDay()) % 7; }      // Woche Mo–So; sonntags 0
+function todoGruppe(a){
+  const n = tageBis(a.faellig);
+  if(n === null) return "ohne";
+  if(n < 0) return "ueber";
+  if(n === 0) return "heute";
+  if(n === 1) return "morgen";
+  return n <= tageBisSonntag() ? "woche" : "spaeter";
+}
+const TODO_GRUPPEN = [["ueber", "Überfällig"], ["heute", "Heute"], ["morgen", "Morgen"], ["woche", "Diese Woche"], ["spaeter", "Später"], ["ohne", "Ohne Datum"]];
+function todoFaellig(a){
+  const n = tageBis(a.faellig);
+  if(n === null) return { text: "", cls: "" };
+  if(n < 0) return { text: `überfällig seit ${-n === 1 ? "1 Tag" : -n + " Tagen"}`, cls: "f-ueber" };
+  if(n === 0) return { text: "heute", cls: "f-heute" };
+  if(n === 1) return { text: "morgen", cls: "f-morgen" };
+  return { text: n > 180 ? fmtDatum(a.faellig) : fmtKurz(a.faellig), cls: "" };
+}
+function todoZaehler(liste){
+  const z = { ueber: 0, heute: 0, woche: 0, offen: liste.length };
+  for(const a of liste){ const g = todoGruppe(a); if(g === "ueber") z.ueber++; else if(g === "heute") z.heute++; else if(g === "morgen" || g === "woche") z.woche++; }
+  return z;
+}
+function todoPillenHtml(liste){
+  const z = todoZaehler(liste);
+  return [z.ueber ? `<span class="tpill ueber">${z.ueber} überfällig</span>` : "",
+          z.heute ? `<span class="tpill heute">${z.heute} heute</span>` : "",
+          z.woche ? `<span class="tpill woche">${z.woche} diese Woche</span>` : "",
+          `<span class="tpill offen">${z.offen} offen</span>`].join("");
+}
+const todoKlasse = a => [a.unter, a.fach].filter(Boolean).join(" · ");
+function todoBereichPille(a){ const b = todoBereich(a.bereich); return `<span class="tpill klein" style="--pf:${esc(todoFarbe(a))}">${esc(b.kurz || b.name)}</span>`; }
+function todoTitel(a){ return `${a.prio === "hoch" ? `<span class="prio-hoch" title="Priorität hoch">‼</span>` : ""}${esc(a.titel)}`; }
+function todoZeileHtml(a){
+  const f = todoFaellig(a), k = todoKlasse(a);
+  return `<button type="button" class="todo-zeile" data-todo-zeigen="${esc(a.id)}" style="--tf:${esc(todoFarbe(a))}">
+    <span class="tz-art" title="${esc(todoArt(a.art).name)}">${esc(todoArt(a.art).symbol || "•")}</span>
+    <span class="tz-mitte"><span class="tz-titel">${todoTitel(a)}</span><span class="tz-meta">${todoBereichPille(a)}${k ? `<span class="tpill klein hohl">${esc(k)}</span>` : ""}${f.text ? `<span class="tz-faellig ${f.cls}">${esc(f.text)}</span>` : ""}</span></span></button>`;
+}
+function renderTodoStart(){
+  const t = todo();
+  $("#todo-h").hidden = !t;
+  if(!t){ $("#todo-start").innerHTML = ""; return; }
+  const liste = todoAufgaben();
+  $("#todo-start").innerHTML = `<div class="todo-block">
+      <div class="todo-pillen">${todoPillenHtml(liste)}</div>
+      ${liste.length ? `<div class="todo-naechste">${liste.slice(0, 5).map(todoZeileHtml).join("")}</div>`
+                     : `<div class="todo-leer">Nichts offen – alle Aufgaben erledigt.</div>`}
+      <button type="button" class="todo-alle" data-ansicht="todo">${liste.length > 5 ? `Alle ${liste.length} anzeigen ›` : "Alle anzeigen ›"}</button>
+    </div>`;
+}
+function todoSuchtext(a){
+  const b = todoBereich(a.bereich);
+  return [a.titel, a.notiz, a.unter, a.fach, b.name, b.kurz, todoArt(a.art).name, sichereListe(a.tags).join(" ")].filter(Boolean).join(" ").toLowerCase();
+}
+function todoKarteHtml(a){
+  const f = todoFaellig(a), k = todoKlasse(a), s = a.schritte || {};
+  const auf = TODO.offen.has(a.id), notiz = String(a.notiz || "");
+  const meta = [todoBereichPille(a), k ? `<span class="tpill klein hohl">${esc(k)}</span>` : "",
+    TODO_STATUS[a.status] ? `<span class="tpill klein tstatus">${esc(TODO_STATUS[a.status])}</span>` : "",
+    s.gesamt ? `<span title="Schritte erledigt">☑ ${s.gesamt - (s.offen || 0)}/${s.gesamt}</span>` : "",
+    ...sichereListe(a.tags).map(x => `<span class="tag">#${esc(x)}</span>`),
+    notiz ? `<span class="tk-mehr" aria-hidden="true">Notiz <span class="pf">▾</span></span>` : ""].filter(Boolean).join("");
+  return `<article class="todo-karte${notiz ? " mit-notiz" : ""}${auf ? " auf" : ""}${a.prio === "niedrig" ? " niedrig" : ""}" data-todo-karte="${esc(a.id)}" style="--tf:${esc(todoFarbe(a))}"${notiz ? ` role="button" tabindex="0" aria-expanded="${auf}"` : ""}>
+    <div class="tk-kopf"><span class="tk-art" title="${esc(todoArt(a.art).name)}">${esc(todoArt(a.art).symbol || "•")}</span>
+      <span class="tk-titel">${todoTitel(a)}</span>${f.text ? `<span class="tk-faellig ${f.cls}">${esc(f.text)}</span>` : ""}</div>
+    <div class="tk-meta">${meta}</div>
+    ${notiz ? `<div class="tk-notiz">${esc(notiz)}</div>` : ""}
+  </article>`;
+}
+function renderTodo(){
+  const t = todo();
+  const alle = todoAufgaben();
+  const bereiche = t ? sichereListe(t.bereiche) : [];
+  for(const b of [...TODO.filter]) if(t && !bereiche.some(x => x.id === b)) TODO.filter.delete(b);   // Bereich gibt es nicht mehr
+  const n = id => alle.filter(a => a.bereich === id).length;
+  $("#chips-todo").innerHTML = bereiche.length ? `<button type="button" class="chip${TODO.filter.size ? "" : " an"}" data-todo-filter="">Alle <span class="n">${alle.length}</span></button>` +
+    bereiche.map(b => `<button type="button" class="chip tchip${TODO.filter.has(b.id) ? " an" : ""}" data-todo-filter="${esc(b.id)}" style="--cf:${esc(b.farbe || "#8b95a7")}" aria-pressed="${TODO.filter.has(b.id)}"><span class="tp"></span>${esc(b.kurz || b.name)} <span class="n">${n(b.id)}</span></button>`).join("") : "";
+  const liste = alle.filter(a => (!TODO.filter.size || TODO.filter.has(a.bereich)) && (!TODO.suche || todoSuchtext(a).includes(TODO.suche)));
+  $("#todo-zaehler").innerHTML = t ? todoPillenHtml(liste) : "";
+  let html = "";
+  for(const [g, name] of TODO_GRUPPEN){
+    const teil = liste.filter(a => todoGruppe(a) === g);
+    if(teil.length) html += `<div class="gruppe g-${g}">${esc(name)}<span class="n">${teil.length}</span></div>` + teil.map(todoKarteHtml).join("");
+  }
+  $("#liste-todo").innerHTML = !t ? `<div class="leer">Keine Todo-Liste im Tresor (todos.json am Mac nicht gefunden).</div>`
+    : html || `<div class="leer">${alle.length ? "Keine Aufgabe passt zu Suche und Filter." : "Nichts offen – alle Aufgaben erledigt."}</div>`;
+  $("#info-todo").textContent = t ? `${alle.length} offen${t.stand ? " · Stand " + fmtStand(t.stand) : ""}` : "";
+}
+function todoFilterSpeichern(){ lsSchreiben(TODO_FILTER_KEY, JSON.stringify([...TODO.filter])); }
+function todoZeigen(id){
+  /* Tippen auf eine Aufgabe der Startseite: Todo-Ansicht, Notiz aufgeklappt, Karte kurz hervorgehoben.
+     Blendet ein Filter oder die Suche sie aus, werden beide zurückgesetzt. */
+  const a = todoAufgaben().find(x => x.id === id);
+  if(!a) return;
+  if((TODO.filter.size && !TODO.filter.has(a.bereich)) || (TODO.suche && !todoSuchtext(a).includes(TODO.suche))){
+    TODO.filter.clear(); todoFilterSpeichern(); TODO.suche = ""; $("#todo-suche").value = "";
+  }
+  if(a.notiz) TODO.offen.add(id);
+  renderTodo();
+  ansichtZeigen("todo", true);
+  const k = [...document.querySelectorAll("[data-todo-karte]")].find(x => x.dataset.todoKarte === id);
+  if(k){ k.scrollIntoView({block: "center"}); k.classList.add("hervor"); spaeter(() => k.classList.remove("hervor"), 3000); }
+  else window.scrollTo(0, 0);
+}
+
 /* ─────────────────────────── Ansichten ─────────────────────────── */
 function render(){
   $("#kopf-schuljahr").textContent = M.schuljahr || "";
   $("#kopf-stand").textContent = M.erstellt ? "Veröffentlicht " + fmtStand(M.erstellt) : "";
   $("#fuss-wer").textContent = (SESSION && SESSION.label) || "Leser";
   $("#kopf-offline").classList.toggle("versteckt", navigator.onLine !== false);
-  renderStart(); renderLerndashboards(); renderSimulationen(); renderPraesentationen(); renderRepos();
+  renderTodoStart(); renderStart(); renderLerndashboards(); renderSimulationen(); renderPraesentationen(); renderRepos(); renderTodo();
   ansichtZeigen(ANSICHT, true);
 }
 function ansichtZeigen(name, ohneSprung){
-  if(name !== "start" && !BEREICHE.includes(name)) name = "start";
+  if(name !== "start" && !ANSICHTEN.includes(name)) name = "start";
   ANSICHT = name;
-  for(const a of ["start", ...BEREICHE]) $("#ansicht-" + a).classList.toggle("versteckt", a !== name);
+  for(const a of ["start", ...ANSICHTEN]) $("#ansicht-" + a).classList.toggle("versteckt", a !== name);
   $("#knopf-start").classList.toggle("versteckt", name === "start");
   $("#kopf-bild").classList.toggle("versteckt", name !== "start");
-  $("#kopf-titel").textContent = name === "start" ? "Dashboard" : KACHELN[name].name;
+  $("#kopf-titel").textContent = name === "start" ? "Dashboard" : name === "todo" ? "Todo" : KACHELN[name].name;
   if(!ohneSprung) window.scrollTo(0, 0);        // beim Neuzeichnen nach einer Aktualisierung bleibt die Stelle
 }
 function appZeigen(){
@@ -1046,6 +1247,17 @@ $("#login-form").addEventListener("submit", async ev => {
 });
 const renderer = { lerndashboards: renderLerndashboards, simulationen: renderSimulationen, praesentationen: renderPraesentationen, repos: renderRepos };
 $("#app").addEventListener("click", ev => {
+  const tz = ev.target.closest("[data-todo-zeigen]");
+  if(tz){ todoZeigen(tz.dataset.todoZeigen); return; }
+  const tf = ev.target.closest("button[data-todo-filter]");
+  if(tf){
+    const id = tf.dataset.todoFilter;
+    if(!id) TODO.filter.clear(); else if(TODO.filter.has(id)) TODO.filter.delete(id); else TODO.filter.add(id);
+    todoFilterSpeichern(); renderTodo(); return;
+  }
+  const tk = ev.target.closest(".todo-karte.mit-notiz");
+  if(tk){ const id = tk.dataset.todoKarte; if(TODO.offen.has(id)) TODO.offen.delete(id); else TODO.offen.add(id);
+    tk.classList.toggle("auf", TODO.offen.has(id)); tk.setAttribute("aria-expanded", TODO.offen.has(id)); return; }
   const b = ev.target.closest("button[data-oeffnen]");
   if(b){ oeffnen(b.dataset.oeffnen, b.dataset.hash || "", ""); return; }
   const k = ev.target.closest("[data-ansicht]");
@@ -1060,7 +1272,11 @@ $("#app").addEventListener("click", ev => {
   const c = ev.target.closest("button[data-fm-chip]");
   if(c){ const st = FM[c.dataset.fmChip]; st[c.dataset.feld] = c.dataset.wert; if(c.dataset.feld === "klasse") st.fach = "alle"; renderer[c.dataset.fmChip](); return; }
 });
+$("#app").addEventListener("keydown", ev => {
+  if((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches(".todo-karte.mit-notiz")){ ev.preventDefault(); ev.target.click(); }
+});
 $("#app").addEventListener("input", ev => {
+  if(ev.target.id === "todo-suche"){ TODO.suche = ev.target.value.trim().toLowerCase(); renderTodo(); return; }
   const s = ev.target.closest("input[data-fm]");
   if(!s) return;
   FM[s.dataset.fm].suche = s.value.trim().toLowerCase();
@@ -1085,7 +1301,7 @@ $("#knopf-abmelden").addEventListener("click", () => {
 async function start(){
   const p = new URLSearchParams(location.search);
   if(p.get("d")) GEWUENSCHT = { id: p.get("d"), hash: location.hash || "", rel: p.get("r") || "" };
-  if(p.get("b") && BEREICHE.includes(p.get("b"))) ANSICHT = p.get("b");
+  if(p.get("b") && ANSICHTEN.includes(p.get("b"))) ANSICHT = p.get("b");
   try{ const z = sessionStorage.getItem(ZIEL_KEY); if(z){ sessionStorage.removeItem(ZIEL_KEY); GEWUENSCHT = JSON.parse(z); } }catch(e){}
   if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(e => console.warn("Service Worker:", e)); }
   fensterHoeren("online", () => { $("#kopf-offline").classList.add("versteckt"); aktualisieren(false); });

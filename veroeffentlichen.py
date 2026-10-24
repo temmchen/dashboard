@@ -10,8 +10,8 @@ OneDrive-Ordner KI/Dashboard Mobil — und für den Portal-Wächter, der
 
   1. holt den GitHub-Stand ab (git pull)
   2. vergleicht die Inhalte (Lerndashboards, Präsentationen, Simulationen samt
-     README.md/github.json/zuordnung.json) und die Repo-Liste bei GitHub mit dem
-     Stand der letzten Veröffentlichung
+     README.md/github.json/zuordnung.json, Todo: todos.json + kategorien.json) und die
+     Repo-Liste bei GitHub mit dem Stand der letzten Veröffentlichung
   3. baut verschlüsselt neu, prüft docs/ auf private Klartexte, committet, pusht —
      nur wenn sich etwas geändert hat
 
@@ -23,6 +23,7 @@ OneDrive-Ordner KI/Dashboard Mobil — und für den Portal-Wächter, der
 """
 
 import json
+import re
 import subprocess
 import sys
 import unicodedata
@@ -99,6 +100,11 @@ def inventar(cfg, mit_repos=True):
         for q in dateien:
             if q.is_file():
                 inv[nfc(f"@journal/{q.relative_to(j).as_posix()}")] = stat_von(q)
+    # Todo (seit 24.10.2026): nur todos.json und kategorien.json – NICHT daten/sicherungen/ (dort legt die
+    # Todo-App bei jedem Speichern eine Kopie ab; das wären dauernd „Änderungen“).
+    for name, q in (B.todo_pfade(cfg) or {}).items():
+        if q.is_file():
+            inv[f"todo/{q.name}"] = stat_von(q)
     inv["@repos"] = B.repos_signatur(B.eigenes_repo(cfg), (cfg.get("repos") or {}).get("portale")) if mit_repos else None
     return inv, manifest
 
@@ -122,6 +128,22 @@ def verbotene_texte(cfg, manifest):
     return texte
 
 
+def todo_texte(manifest):
+    """Titel und Notizen der offenen Aufgaben (Todo). Geprüft wird nur außerhalb des App-Codes
+    (index.html, sw.js): kurze Alltagstitel wie „Aktualisieren“ kämen dort zufällig vor und würden sonst
+    jede Veröffentlichung blockieren – Daten gelangen ohnehin nur über den Build (vaults/) nach docs/."""
+    texte = []
+    for a in ((manifest.get("todo") or {}).get("aufgaben") or []):
+        for feld, art in (("titel", "Titel"), ("notiz", "Notiz")):
+            t = str(a.get(feld) or "").strip()
+            if len(t) >= 10:
+                texte.append((t.lower()[:80], f"{art} der Aufgabe {a.get('id')}"))
+    return texte
+
+
+APP_CODE = re.compile(r"^(index\.html|sw\.js)(\.bak-.*)?$")
+
+
 def pruefe_klartext(cfg, manifest):
     """docs/ nach privaten Klartexten durchsuchen; geheime Dateien dürfen nicht im Git-Index sein."""
     treffer = []
@@ -132,12 +154,13 @@ def pruefe_klartext(cfg, manifest):
         if zeile.startswith("120000"):
             treffer.append((zeile.split("\t", 1)[-1], "Verknüpfung (Symlink) im Git-Index"))
     texte = verbotene_texte(cfg, manifest)
+    todo = todo_texte(manifest)
     for p in sorted(DOCS.rglob("*")):
         if not p.is_file() or p.suffix == ".enc":            # Chiffrat: zufällige Bytes, kein Text
             continue
         rel = p.relative_to(HIER).as_posix()
         klein = p.read_bytes().lower()
-        for text, art in texte:
+        for text, art in texte + ([] if APP_CODE.match(p.name) else todo):
             if text.encode("utf-8") in klein:
                 treffer.append((rel, art))
     return treffer
@@ -202,9 +225,11 @@ def main():
     if repos_neu is None:
         jetzt["@repos"] = alt.get("@repos")
         sag("   ⚠️  GitHub-Repo-Liste nicht abrufbar — die letzte Liste bleibt.")
-    neu = sorted(k for k in set(jetzt) - set(alt) if not k.startswith("@"))
-    weg = sorted(k for k in set(alt) - set(jetzt) if not k.startswith("@"))
-    geaendert = sorted(k for k in set(jetzt) & set(alt) if jetzt[k] != alt[k] and not k.startswith("@"))
+    # Alle Schlüssel außer der Repo-Signatur zählen – auch @zuordnung/… und @journal/… (bis 24.10.2026 fielen
+    # sie hier heraus: --pruefen meldete OFFEN, der Lauf danach aber „Alles aktuell“, ohne zu bauen).
+    neu = sorted(k for k in set(jetzt) - set(alt) if k != "@repos")
+    weg = sorted(k for k in set(alt) - set(jetzt) if k != "@repos")
+    geaendert = sorted(k for k in set(jetzt) & set(alt) if jetzt[k] != alt[k] and k != "@repos")
     repos_anders = jetzt.get("@repos") != alt.get("@repos")
     sag("\n② Änderungen seit der letzten Veröffentlichung:" if stand_alt
         else "\n② Erste Veröffentlichung mit diesem Werkzeug — nehme alles auf:")

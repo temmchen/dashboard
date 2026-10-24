@@ -20,7 +20,7 @@
    in IndexedDB (wie die Sitzung der Seite in localStorage), damit er einen Neustart des Workers
    überlebt. Ohne Schlüssel leitet d/… zur Anmeldeseite um (?d=<Kennung>&r=<Datei>). */
 
-const CACHE = "dm-v3";
+const CACHE = "dm-v4";                 // v4 (24.10.2026): Todo-Block und -Ansicht in index.html
 const HUELLE = [
   "./", "./index.html", "./manifest.webmanifest",
   "./icons/icon-180.png", "./icons/icon-192.png", "./icons/icon-512.png"
