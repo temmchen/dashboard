@@ -16,3 +16,6 @@ __pycache__/
 
 # Sicherungskopien neben den Dateien (Konvention *.bak-JJJJMMTT)
 *.bak-*
+
+# GEHEIM — Token des Todo-Rückwegs (liegt in _Portal-Setup/geheim, nie ins Repo)
+todo-rueckweg.json

@@ -49,10 +49,12 @@ Home-Bildschirm bleibt sonst tagelang bei der alten Fassung.
 
 ## Todo (seit 24.10.2026)
 
-Ganz oben auf der Startseite steht ein Block **Todo**: Zähler als farbige Pillen („2 überfällig“ rot · „3 heute“
-orange · „5 diese Woche“ · „12 offen“), darunter die nächsten fünf Aufgaben (Streifen und Pille in der
+Ganz oben auf der Startseite steht ein Block **Todo**: Zähler als Ampel-Pillen („3 dringend“ rot · „12 offen“ gelb ·
+„2 erledigt“ grün für gerade Abgehaktes), darunter die nächsten fünf Aufgaben (Streifen und Pille in der
 Bereichsfarbe, Art-Symbol, Titel, Klasse/Fach, Fälligkeit „heute“, „morgen“, „Mo 27.10.“, „überfällig seit 2 Tagen“)
-und „Alle anzeigen“. Die eigene Ansicht **Todo** (`…/dashboard/?b=todo`, „‹ Start“ zurück) hat oben eine Suche (Titel,
+und „Alle anzeigen“; dazu eine eigene **Kachel Todo** in der Kachelreihe (✓, rosa Verlauf #FB7185 → #9F1239 wie die
+Mac-Kachel, Zähler als Untertitel). **Ampel** je Aufgabe als Punkt vor dem Titel: rot = Priorität hoch, überfällig oder
+heute fällig · gelb = offen, nicht dringend · grün = erledigt (gesendet). Die eigene Ansicht **Todo** (`…/dashboard/?b=todo`, „‹ Start“ zurück) hat oben eine Suche (Titel,
 Notiz, Klasse, Fach, Tags), Filter-Chips je Bereich (Privat, CdM, Promotion, LTEtt – Mehrfachauswahl, gemerkt im Gerät
 unter `localStorage` `dm-todo-filter`) und die Gruppen Überfällig · Heute · Morgen · Diese Woche (bis Sonntag) · Später ·
 Ohne Datum. Karten: linker Streifen in Bereichsfarbe, ‼ bei Priorität hoch, Status „In Arbeit“/„Wartet“, Schritte
@@ -62,9 +64,32 @@ auf der Startseite die nächsten Aufgaben zweispaltig.
 | | |
 | --- | --- |
 | **Quelle** | `KI/Todo/daten/todos.json` und `KI/Todo/kategorien.json` der Todo-App am Mac (Ordner nach Konvention neben der Quelle `simulationen`; sonst `zugangsdaten.json` → `todo`; für Testläufe Umgebungsvariable `DM_TODO` = Ordner mit einer Kopie). `daten/sicherungen/` wird nicht gelesen. |
-| **Manifest** | Feld `todo`: `{stand, bereiche:[{id,name,kurz,farbe,symbol}], arten:{id:{name,symbol}}, aufgaben:[…]}` – nur nicht erledigte Aufgaben mit `id, titel, notiz` (max. 300 Zeichen), `bereich, unter, fach, art, prio, faellig, status, tags, schritte:{offen,gesamt}`, sortiert nach Fälligkeit (ohne Datum zuletzt), dann Priorität. Fehlt todos.json: `todo: null`, der Block entfällt. |
-| **Nur lesen** | Das Handy ändert nichts – kein Abhaken, kein Zurückschreiben. Aufgaben pflegt die Todo-App am Mac. |
-| **Veröffentlichung** | `veroeffentlichen.py` nimmt `todo/todos.json` und `todo/kategorien.json` ins Inventar; eine Änderung macht `--pruefen` zu `OFFEN`, der **Portal-Wächter** veröffentlicht beim nächsten Lauf (alle 20 min). Sofort: Knopf „Mobil veröffentlichen“ der Todo-App (`POST /api/mobil`) oder `Dashboard Mobil veröffentlichen.command`; danach am Gerät ↻. Die Klartext-Prüfung sucht Titel und Notizen offener Aufgaben in `docs/` (außer im App-Code `index.html`/`sw.js`). |
+| **Manifest** | Feld `todo`: `{stand, bereiche:[{id,name,kurz,farbe,symbol}], arten:{id:{name,symbol}}, aufgaben:[…], kategorien, rueckweg}` – nur offene Aufgaben (ohne `erledigt` und `geloescht`) mit `id, titel, notiz` (max. 300 Zeichen), `bereich, unter, fach, art, prio, faellig, status, tags, schritte:{offen,gesamt}`, sortiert nach Fälligkeit (ohne Datum zuletzt), dann Priorität. Fehlt todos.json: `todo: null`, der Block entfällt. |
+| **Ohne Rückweg** | Fehlt `todo-rueckweg.json` (Manifest `todo.rueckweg: null`), ist die Ansicht nur lesend und zeigt die Anleitung „am Mac in Dashboard Pro → Kachel Todo → Menü → ‚Rückweg vom iPhone einrichten‘“. |
+| **Veröffentlichung** | `veroeffentlichen.py` nimmt `todo/todos.json`, `todo/kategorien.json`, `todo/kategorien.py` und (nur Größe/Zeit) `geheim/todo-rueckweg.json` ins Inventar; eine Änderung macht `--pruefen` zu `OFFEN`, der **Portal-Wächter** veröffentlicht beim nächsten Lauf (alle 20 min). Sofort: Knopf „Mobil veröffentlichen“ der Todo-App (`POST /api/mobil`) oder `Dashboard Mobil veröffentlichen.command`; danach am Gerät ↻. Die Klartext-Prüfung sucht Titel und Notizen offener Aufgaben in `docs/` (außer im App-Code `index.html`/`sw.js`). |
+
+### Rückweg: abhaken und erfassen am iPhone/iPad (seit 24.10.2026 abends)
+
+Ist der Rückweg eingerichtet, hat jede Karte links einen runden **Haken**: Tippen → Karte grau/durchgestrichen,
+„✓ gesendet“, 5 s lang **„Rückgängig“** (nimmt die Änderung aus der Warteschlange; war sie schon unterwegs, geht
+`offen` hinterher). Aufgeklappt (Tippen auf die Karte): Notiz, **Verschieben** „Heute“ · „Morgen“ · „+1 Woche“ und
+**Löschen** (Rückfrage; am Mac landet die Aufgabe im Papierkorb, 90 Tage wiederherstellbar). **„+ Aufgabe“** oben in
+der Ansicht bzw. **+** im Startseiten-Block öffnet das Formular (iPhone: Blatt von unten, iPad: mittig): Bereich als
+Farbknöpfe (zuletzt gewählter bleibt), Klasse/Modul/Teil als Auswahlrad (Beschriftung aus `unterLabel`, letzte Wahl je
+Bereich gemerkt), bei LTEtt Fach (Fächer der Klasse zuerst, aus `faecherJeUnter`; hat die Klasse genau eines, ist es
+vorgewählt), „Was ist zu tun?“ (Arten mit Symbol), Fälligkeit (Heute · Morgen · Diese Woche = Freitag · Nächste Woche =
+Freitag · 📅 Datum · ohne; mit Stundenplan zusätzlich **„Nächste Stunde · Di 27.10.“** und „Übernächste“ aus
+`kategorien.stunden[Klasse|Fach]` bzw. `[Klasse]`, automatisch gewählt, bis man selbst ein Datum antippt), Priorität,
+Titel optional (leer → „Art · Klasse · Fach“ wie am Mac), Notiz. Neue Aufgaben (`id` `m-JJJJMMTT-<6 hex>`) stehen
+sofort in der Liste, Pille **„ausstehend“** bis der Mac sie übernommen hat.
+
+| | |
+| --- | --- |
+| **Ablauf** | Handy → `PUT https://api.github.com/repos/<repo>/contents/aenderungen/<JJJJMMTT-HHMMSS>-<6 hex>.json` ins **private** Repo `temmchen/todo-aenderungen` → am Mac holt `KI/Todo/abgleich.py` (launchd alle 5 min, außerdem beim Öffnen der Todo-App) die Dateien ab, wendet sie auf `todos.json` an (Mac gewinnt bei Konflikten), löscht sie im Repo und veröffentlicht Dashboard Mobil neu → das Handy sieht den übernommenen Stand nach ↻ bzw. beim nächsten Öffnen. |
+| **Was gesendet wird** | Eine Datei je Sendevorgang mit allen wartenden Änderungen: `{"v":1, "zeit", "geraet", "aenderungen":[…]}` mit `{"typ":"neu","aufgabe":{id,titel,notiz,bereich,unter,fach,art,prio,faellig}}`, `{"typ":"erledigt"\|"offen"\|"loeschen","id"}`, `{"typ":"verschieben","id","faellig"}` (Vertrag: `RUECKWEG-VERTRAG.md` der Mac-Seite). Abhaken und Löschen werden kurz gesammelt (Rückgängig-Frist), Neues sofort gesendet. |
+| **Warteschlange** | `localStorage` `dm-todo-ausstehend` (noch nicht gesendet) – bei Fehler/offline bleibt alles dort und geht beim nächsten Öffnen, bei Fokus/Rückkehr in die App oder wenn das Netz wiederkommt erneut raus. `dm-todo-gesendet`: gesendete Änderungen als Überlagerung, bis das Manifest sie enthält (Stand `todo.stand` neuer als die Sendezeit **und** Aufgabe fehlt bzw. ist da/hat das neue Datum); nach 3 Tagen verworfen. Statuszeile oben: „2 Änderungen warten · zuletzt gesendet 19:02 · 1 Änderung noch nicht am Mac übernommen“. |
+| **Token** | Fein-granulares GitHub-Token nur für dieses eine Repo (Contents: Lesen/Schreiben) in `_Portal-Setup/geheim/todo-rueckweg.json` (`{"repo","token","seit"}`, angelegt von Dashboard Pro). `build.py` legt `{repo, token}` **nur ins verschlüsselte Manifest** (`todo.rueckweg`); `veroeffentlichen.py` bricht ab, wenn der Token-Wert irgendwo in `docs/` (auch im App-Code) oder in einer Datei im Git-Index im Klartext steht, und nimmt die Datei ins Inventar (neues/widerrufenes Token → Veröffentlichung). Testläufe: `DM_RUECKWEG=<Pfad>`. |
+| **Kategorien** | `todo.kategorien` = `{bereiche:[{id,name,kurz,farbe,symbol,unterLabel,unter,faecher,faecherJeUnter}], arten:[…], prioritaeten:[…], stunden?}` aus `KI/Todo/kategorien.py` → `kategorien_laden()` (Klassen/Fächer aus Stundenplan und Référentiels); fehlt das Modul, direkt `kategorien.json`. |
 
 ## Zuordnung zu Klassen und Fächern (seit 05.10.2026)
 

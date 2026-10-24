@@ -38,9 +38,15 @@ Was aufgenommen wird (`quellen` in zugangsdaten.json):
     Pfade nach Konvention neben der Quelle „simulationen“ (KI-Ordner) oder in zugangsdaten.json
     → `zuordnung`: {"modul": …/zuordnung.py, "zentral": …/zuordnungen.json, "journal": …/Journal de Classe}.
   * Todo (seit 24.10.2026): die offenen Aufgaben der Todo-App (`KI/Todo/daten/todos.json` + `kategorien.json`) als
-    Manifest-Feld `todo` – nur lesend, das Handy schreibt nichts zurück. Ordner nach Konvention neben der Quelle
-    „simulationen“ (KI/Todo), sonst zugangsdaten.json → `todo` (Ordner) bzw. für Testläufe die Umgebungsvariable
-    DM_TODO (Ordner mit daten/todos.json und kategorien.json). Fehlt todos.json → `todo: null`.
+    Manifest-Feld `todo`. Ordner nach Konvention neben der Quelle „simulationen“ (KI/Todo), sonst
+    zugangsdaten.json → `todo` (Ordner) bzw. für Testläufe die Umgebungsvariable DM_TODO (Ordner mit
+    daten/todos.json und kategorien.json). Fehlt todos.json → `todo: null`.
+    Rückweg (seit 24.10.2026 abends): `todo.kategorien` (Listen für das Erfassen-Formular, aus KI/Todo/kategorien.py
+    → kategorien_laden(), Rückfall kategorien.json) und `todo.rueckweg` = {repo, token} aus
+    _Portal-Setup/geheim/todo-rueckweg.json (Testläufe: DM_RUECKWEG = Pfad einer solchen Datei) oder null. Das
+    Handy legt seine Änderungen (neu, erledigt, offen, verschieben, loeschen) als JSON-Datei im privaten Repo
+    temmchen/todo-aenderungen ab; KI/Todo/abgleich.py holt sie am Mac ab. Das Token steht NUR im Manifest
+    (verschlüsselt); veroeffentlichen.py prüft, dass es nirgends im Klartext auftaucht.
 
 Krypto-Design (muss zu docs/index.html und docs/sw.js passen — wie Journal Mobil,
 Schuljahr- und CdM-Portal):
@@ -705,11 +711,13 @@ def kameras_links(cfg: dict):
 
 
 # ─────────────────────────── Todo (seit 24.10.2026) ─────────────────────────
-# Nur lesen: die Todo-App am Mac (KI/Todo, server.py) pflegt todos.json; aufs Handy kommen die offenen
-# Aufgaben ohne Verlauf (erledigt_am, erstellt, vorlagen) und ohne Schritt-Texte.
+# Die Todo-App am Mac (KI/Todo, server.py) pflegt todos.json; aufs Handy kommen die offenen Aufgaben ohne
+# Verlauf (erledigt_am, erstellt, vorlagen) und ohne Schritt-Texte. Zurück zum Mac geht es über den Rückweg
+# (GitHub-Repo, siehe rueckweg_laden) – build.py selbst liest nur.
 
 TODO_PRIO = {"hoch": 0, "normal": 1, "niedrig": 2}
 TODO_STATUS = ("offen", "aktiv", "wartet")
+TODO_AUSGESCHLOSSEN = ("erledigt", "geloescht")   # geloescht: Löschregister am Mac (90 Tage), nicht aufs Handy
 TODO_NOTIZ_MAX = 300
 
 
@@ -731,21 +739,98 @@ def todo_pfade(cfg: dict):
     tcfg = json_lesen(ordner / "config.json", "Todo/config.json")
     tcfg = tcfg if isinstance(tcfg, dict) else {}
     return {"daten": ordner / str(tcfg.get("daten") or "daten/todos.json"),
-            "kategorien": ordner / str(tcfg.get("kategorien") or "kategorien.json")}
+            "kategorien": ordner / str(tcfg.get("kategorien") or "kategorien.json"),
+            "modul": ordner / "kategorien.py", "ordner": ordner}
+
+
+def rueckweg_pfad():
+    """Die geheime Datei des Rückwegs: _Portal-Setup/geheim/todo-rueckweg.json – derselbe Ordner, in den die
+    Verknüpfung zugangsdaten.json zeigt. Für Testläufe: Umgebungsvariable DM_RUECKWEG (Pfad einer solchen Datei)."""
+    roh = os.environ.get("DM_RUECKWEG")
+    if roh:
+        return Path(roh).expanduser()
+    return KONFIG.resolve().parent / "todo-rueckweg.json"
+
+
+def rueckweg_laden():
+    """{repo, token} für den Rückweg Handy → Mac oder None (Datei fehlt, unlesbar oder unvollständig).
+    Bewusst kein Abbruch: ohne Rückweg zeigt das Handy die Einrichtungs-Anleitung statt des Formulars."""
+    p = rueckweg_pfad()
+    if not p.is_file():
+        return None
+    try:
+        d = json.loads(p.read_text(encoding="utf-8"))
+    except Exception as ex:
+        print(f"  ⚠️  {p.name} ist nicht lesbar ({ex}) – Rückweg bleibt aus.")
+        return None
+    repo, token = str(d.get("repo") or "").strip(), str(d.get("token") or "").strip()
+    if not re.match(r"^[\w.-]+/[\w.-]+$", repo) or len(token) < 10:
+        print(f"  ⚠️  {p.name}: „repo“ oder „token“ fehlt – Rückweg bleibt aus.")
+        return None
+    return {"repo": repo, "token": token}
+
+
+def _kategorien_roh(pf: dict):
+    """Zusammengeführte Kategorien der Todo-App: kategorien.py → kategorien_laden(ordner) (Mac-Seite, kennt auch
+    Fächer je Klasse) – fehlt das Modul oder scheitert es, direkt kategorien.json."""
+    modul = pf.get("modul")
+    if modul and modul.is_file():
+        try:
+            if str(pf["ordner"]) not in sys.path:
+                sys.path.insert(0, str(pf["ordner"]))
+            spec = importlib.util.spec_from_file_location("todo_kategorien", modul)
+            m = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(m)
+            k = m.kategorien_laden(pf["ordner"])
+            if isinstance(k, dict):
+                return k
+        except Exception as ex:
+            print(f"  ⚠️  kategorien.py nicht nutzbar ({type(ex).__name__}: {ex}) – nehme kategorien.json.")
+    k = json_lesen(pf["kategorien"], "kategorien.json")
+    return k if isinstance(k, dict) else {}
+
+
+def todo_kategorien(k: dict) -> dict:
+    """Manifest-Feld `todo.kategorien` (Vertrag RUECKWEG-VERTRAG.md): {bereiche:[{id,name,kurz,farbe,symbol,unterLabel,
+    unter,faecher,faecherJeUnter}], arten:[{id,name,symbol}] (Reihenfolge wie kategorien.json), prioritaeten:[{id,name,farbe}],
+    stunden?:{"1GIGF":[{datum,fach,von}], "1GIGF|ELETE":[…]}}."""
+    liste = lambda x: [str(v) for v in (x or []) if str(v).strip()] if isinstance(x, list) else []
+    bereiche = []
+    for b in k.get("bereiche") or []:
+        if not isinstance(b, dict) or not b.get("id"):
+            continue
+        fju = b.get("faecherJeUnter") if isinstance(b.get("faecherJeUnter"), dict) else {}
+        bereiche.append({"id": str(b["id"]), "name": str(b.get("name") or b["id"]), "kurz": str(b.get("kurz") or b.get("name") or b["id"]),
+                         "farbe": str(b.get("farbe") or ""), "symbol": str(b.get("symbol") or ""),
+                         "unterLabel": str(b.get("unterLabel") or "Unterbereich"), "unter": liste(b.get("unter")),
+                         "faecher": liste(b.get("faecher")),
+                         "faecherJeUnter": {str(u): liste(f) for u, f in fju.items() if liste(f)}})
+    arten = [{"id": str(a["id"]), "name": str(a.get("name") or a["id"]), "symbol": str(a.get("symbol") or "")}
+             for a in (k.get("arten") or []) if isinstance(a, dict) and a.get("id")]
+    prios = [{"id": str(p["id"]), "name": str(p.get("name") or p["id"]), "farbe": str(p.get("farbe") or "")}
+             for p in (k.get("prioritaeten") or []) if isinstance(p, dict) and p.get("id") in TODO_PRIO]
+    if not prios:
+        prios = [{"id": "hoch", "name": "Hoch", "farbe": "#DC2626"}, {"id": "normal", "name": "Normal", "farbe": "#6B7280"},
+                 {"id": "niedrig", "name": "Niedrig", "farbe": "#9CA3AF"}]
+    aus = {"bereiche": bereiche, "arten": arten, "prioritaeten": prios}
+    # Nächste Unterrichtstermine je Klasse bzw. „Klasse|Fach“ (kategorien.py, aus dem Stundenplan) – unverändert
+    # durchgereicht; das Formular am Handy bietet daraus „Nächste Stunde“ / „Übernächste“ an. Fehlt es: weglassen.
+    if isinstance(k.get("stunden"), dict):
+        aus["stunden"] = k["stunden"]
+    return aus
 
 
 def sammle_todo(cfg: dict):
-    """Manifest-Feld `todo`: {stand, bereiche:[{id,name,kurz,farbe,symbol}], arten:{id:{name,symbol}}, aufgaben:[…]}
-    mit allen nicht erledigten Aufgaben, sortiert nach Fälligkeit (ohne Datum zuletzt), dann Priorität.
-    None, wenn todos.json fehlt."""
+    """Manifest-Feld `todo`: {stand, bereiche:[{id,name,kurz,farbe,symbol}], arten:{id:{name,symbol}}, aufgaben:[…],
+    kategorien:{…}, rueckweg:{repo,token}|null} mit allen nicht erledigten Aufgaben, sortiert nach Fälligkeit (ohne
+    Datum zuletzt), dann Priorität. None, wenn todos.json fehlt."""
     pf = todo_pfade(cfg)
     if not pf or not pf["daten"].is_file():
         return None
     d = json_lesen(pf["daten"], "todos.json")
-    k = json_lesen(pf["kategorien"], "kategorien.json")
     if not isinstance(d, dict):
         return None
-    k = k if isinstance(k, dict) else {}
+    k = _kategorien_roh(pf)
     bereiche = [{"id": str(b["id"]), "name": str(b.get("name") or b["id"]), "kurz": str(b.get("kurz") or b.get("name") or b["id"]),
                  "farbe": str(b.get("farbe") or ""), "symbol": str(b.get("symbol") or "")}
                 for b in (k.get("bereiche") or []) if isinstance(b, dict) and b.get("id")]
@@ -756,7 +841,7 @@ def sammle_todo(cfg: dict):
         if not isinstance(a, dict) or not str(a.get("titel") or "").strip():
             continue
         status = str(a.get("status") or "offen")
-        if status == "erledigt":
+        if status in TODO_AUSGESCHLOSSEN:
             continue
         faellig = str(a.get("faellig") or "")[:10]
         notiz = str(a.get("notiz") or "").strip()
@@ -774,7 +859,8 @@ def sammle_todo(cfg: dict):
             "schritte": {"offen": sum(1 for s in schritte if not s.get("ok")), "gesamt": len(schritte)},
         })
     aufgaben.sort(key=lambda a: (a["faellig"] is None, a["faellig"] or "", TODO_PRIO[a["prio"]], a["titel"].lower()))
-    return {"stand": str(d.get("geaendert") or ""), "bereiche": bereiche, "arten": arten, "aufgaben": aufgaben}
+    return {"stand": str(d.get("geaendert") or ""), "bereiche": bereiche, "arten": arten, "aufgaben": aufgaben,
+            "kategorien": todo_kategorien(k), "rueckweg": rueckweg_laden()}
 
 
 # ─────────────────────────── Alles einsammeln ───────────────────────────────
@@ -836,6 +922,9 @@ def main():
                     print(f"  🔒 {e['id']:44s} {e['titel']}  ({n} Datei{'en' if n != 1 else ''}{', mehrteilig' if e['mehrteilig'] else ''})")
         t = manifest.get("todo")
         print(f"\n[todo]\n  {len(t['aufgaben'])} offene Aufgabe(n), Stand {t['stand']}" if t else "\n[todo]\n  – todos.json nicht gefunden")
+        if t:
+            print(f"  Rückweg: {'eingerichtet → ' + t['rueckweg']['repo'] if t.get('rueckweg') else 'nicht eingerichtet'}"
+                  f" · {sum(len(b['faecherJeUnter']) for b in t['kategorien']['bereiche'])} Klasse(n) mit Fächern")
         for u in uebersprungen:
             print(f"  – übersprungen: {u}")
         return
@@ -993,6 +1082,9 @@ def main():
           f"{st['simulationen']} Simulationen · {st['links']} Links · {st['repos']} Repos · "
           f"{st['todo']} offene Aufgaben{'' if manifest.get('todo') else ' (keine todos.json)'} · "
           f"{st['dateien']} Dateien · {gesamt / 1024 / 1024:.1f} MiB")
+    t = manifest.get("todo")
+    if t:
+        print(f"Todo-Rückweg: {'eingerichtet → ' + t['rueckweg']['repo'] + ' (Token nur im Chiffrat)' if t.get('rueckweg') else 'nicht eingerichtet (todo-rueckweg.json fehlt)'}")
     for b in BEREICHE:
         for e in manifest["bereiche"][b]:
             if e["typ"] == "tresor":

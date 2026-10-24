@@ -10,7 +10,8 @@ OneDrive-Ordner KI/Dashboard Mobil — und für den Portal-Wächter, der
 
   1. holt den GitHub-Stand ab (git pull)
   2. vergleicht die Inhalte (Lerndashboards, Präsentationen, Simulationen samt
-     README.md/github.json/zuordnung.json, Todo: todos.json + kategorien.json) und die
+     README.md/github.json/zuordnung.json, Todo: todos.json + kategorien.json + kategorien.py,
+     Rückweg-Token: geheim/todo-rueckweg.json) und die
      Repo-Liste bei GitHub mit dem Stand der letzten Veröffentlichung
   3. baut verschlüsselt neu, prüft docs/ auf private Klartexte, committet, pusht —
      nur wenn sich etwas geändert hat
@@ -36,7 +37,7 @@ import build as B  # noqa: E402  (gleicher Ordner: Quellen einsammeln, Repo-Sign
 DOCS = HIER / "docs"
 KONFIG = HIER / "zugangsdaten.json"
 STAND = HIER / ".letzter-stand.json"          # lokales Gedächtnis (gitignored)
-GEHEIM = ("zugangsdaten.json", ".build-state.json", ".letzter-stand.json")
+GEHEIM = ("zugangsdaten.json", ".build-state.json", ".letzter-stand.json", "todo-rueckweg.json")
 BEGLEITER = ("README.md", "github.json", "zuordnung.json")
 
 
@@ -103,8 +104,12 @@ def inventar(cfg, mit_repos=True):
     # Todo (seit 24.10.2026): nur todos.json und kategorien.json – NICHT daten/sicherungen/ (dort legt die
     # Todo-App bei jedem Speichern eine Kopie ab; das wären dauernd „Änderungen“).
     for name, q in (B.todo_pfade(cfg) or {}).items():
-        if q.is_file():
+        if name != "ordner" and q.is_file():
             inv[f"todo/{q.name}"] = stat_von(q)
+    # Rückweg (seit 24.10.2026 abends): ein neues oder widerrufenes Token muss aufs Handy – nur Größe/Zeit ins
+    # Inventar, nie der Inhalt (.letzter-stand.json ist zwar gitignored, aber trotzdem kein Ort für Geheimnisse).
+    rw = B.rueckweg_pfad()
+    inv["@todo/rueckweg"] = stat_von(rw) if rw.is_file() else None
     inv["@repos"] = B.repos_signatur(B.eigenes_repo(cfg), (cfg.get("repos") or {}).get("portale")) if mit_repos else None
     return inv, manifest
 
@@ -126,6 +131,13 @@ def verbotene_texte(cfg, manifest):
             if e.get("typ") == "tresor" and len(t) >= 8:
                 texte.append((t.lower(), f"Titel von {b}/{e.get('id')}"))
     return texte
+
+
+def rueckweg_texte():
+    """Das Token des Rückwegs (geheim/todo-rueckweg.json): gehört NUR ins verschlüsselte Manifest – nirgends in docs/,
+    auch nicht im App-Code, und nicht im Git-Index."""
+    rw = B.rueckweg_laden()
+    return [(rw["token"].lower(), "Token des Todo-Rückwegs")] if rw else []
 
 
 def todo_texte(manifest):
@@ -153,8 +165,12 @@ def pruefe_klartext(cfg, manifest):
     for zeile in git("ls-files", "-s", fehler_ok=True).stdout.splitlines():
         if zeile.startswith("120000"):
             treffer.append((zeile.split("\t", 1)[-1], "Verknüpfung (Symlink) im Git-Index"))
-    texte = verbotene_texte(cfg, manifest)
+    texte = verbotene_texte(cfg, manifest) + rueckweg_texte()
     todo = todo_texte(manifest)
+    for token, art in rueckweg_texte():                     # alle Dateien im Git-Index (auch außerhalb von docs/)
+        g = git("grep", "--cached", "-l", "-i", "-F", "-e", token, fehler_ok=True)
+        for datei in g.stdout.splitlines():
+            treffer.append((datei, art + " (im Git-Index)"))
     for p in sorted(DOCS.rglob("*")):
         if not p.is_file() or p.suffix == ".enc":            # Chiffrat: zufällige Bytes, kein Text
             continue
