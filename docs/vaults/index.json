@@ -2,8 +2,8 @@
  "v": 2,
  "portal": "dashboard-mobil",
  "schuljahr": "2026 – 2027",
- "erstellt": "2026-10-24T07:01:16",
- "build": "f862d1c5a62e",
+ "erstellt": "2026-10-24T07:21:38",
+ "build": "d10b5d5c86d1",
  "kdf": {
   "typ": "PBKDF2-SHA256",
   "iter": 600000,
@@ -12,7 +12,7 @@
  "principals": [
   {
    "id": "p0",
-   "salt": "97sBnDQZ8Qk3w4F32xufiQ=="
+   "salt": "DP/zdhSNZqyDEIpWN0rJ6A=="
   }
  ],
  "vaults": [
@@ -20,8 +20,8 @@
    "id": "b6ba2a86af72d9b8",
    "wraps": [
     {
-     "iv": "y4AfnX6f6Fhd+DgP",
-     "ct": "LcDL2agFRQLm2LalBaV2+0sGaTj70c69D6849ADTLF76RMxAbREexVOZtlk3WuDGcDX0PsEEm0Ni2o+PWT62JdnsSkLpFmxtbef8YixPEmlWSaLbI8Foua/8lMwtuS/0XWFMFnLN4A==",
+     "iv": "tefdP4bCzMPpCbTp",
+     "ct": "t/0fK8gB5fmz+VEy26Ym42bRK1bujIM0ZUnWeCeoO0yFSro3JCW402plhTw37EVghXVsLvGEGIM1+LIH7mtX6bqoIPKSQ+P+BDDRBRwG64vTIUW+h7ng+VaY2LRy2DaeBsHnf/NkVA==",
      "p": "p0"
     }
    ],
