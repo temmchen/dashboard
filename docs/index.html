@@ -159,6 +159,8 @@ h3{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx
   font-weight:650;font-size:14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
 .repo .r-knoepfe .primaer{background:var(--acc);color:var(--acc-tx);border-color:transparent}
 .leer{color:var(--tx3);font-size:14px;padding:18px 4px}
+.todo-ausgeblendet{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.todo-zuruecksetzen{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--acc);background:transparent;color:var(--acc);font-weight:700;font-size:15px;cursor:pointer}
 /* Zuordnung (Klassen · Fächer) – Zeile unter dem Titel und Editor als Blatt von unten */
 .z-zuo{margin-top:5px;display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;font-size:12.5px;color:var(--tx2)}
 .z-zuo .tag{padding:1px 8px;border-radius:999px;border:1px solid var(--line2);background:var(--card2);color:var(--tx)}
@@ -1177,6 +1179,13 @@ function todoKachelUnter(){
   return [z.rot ? `${z.rot} dringend` : "", `${z.gelb} offen`, z.gruen ? `${z.gruen} erledigt` : ""].filter(Boolean).join(" · ")
     + (RW.q.length ? `<br>${RW.q.length} Änderung${RW.q.length === 1 ? "" : "en"} warte${RW.q.length === 1 ? "t" : "n"} aufs Senden` : "");
 }
+/* Suchbegriff: nur, wenn Buchstaben oder Ziffern darin stehen – ein versehentlich getipptes
+   Satzzeichen („ʼ“, „,“, „.“) blendet sonst alle Aufgaben aus (25.10.2026). */
+function todoSuchbegriff(wert){
+  const s = String(wert || "").trim().toLowerCase();
+  // \p{Lm} (z. B. „ʼ“ U+02BC, das iOS als Apostroph einsetzt) zählt Unicode zu den Buchstaben – hier bewusst nicht.
+  return /[\p{Lu}\p{Ll}\p{Lt}\p{Lo}\p{N}]/u.test(s) ? s : "";
+}
 function todoSuchtext(a){
   const b = todoBereich(a.bereich);
   return [a.titel, a.notiz, a.unter, a.fach, b.name, b.kurz, todoArt(a.art).name, sichereListe(a.tags).join(" ")].filter(Boolean).join(" ").toLowerCase();
@@ -1221,7 +1230,10 @@ function renderTodo(){
     if(teil.length) html += `<div class="gruppe g-${g}">${esc(name)}<span class="n">${offen}</span></div>` + teil.map(todoKarteHtml).join("");
   }
   $("#liste-todo").innerHTML = !t ? `<div class="leer">Keine Todo-Liste im Tresor (todos.json am Mac nicht gefunden).</div>`
-    : html || `<div class="leer">${alle.length ? "Keine Aufgabe passt zu Suche und Filter." : "Nichts offen – alle Aufgaben erledigt."}</div>`;
+    : html || (alle.length
+        ? `<div class="leer todo-ausgeblendet">Keine Aufgabe passt zu ${[TODO.suche ? `der Suche „${esc(TODO.suche)}“` : "", TODO.filter.size ? "dem Filter" : ""].filter(Boolean).join(" und ") || "Suche und Filter"}.
+             <button type="button" class="todo-zuruecksetzen" data-todo-zuruecksetzen>Suche und Filter zurücksetzen · ${alle.length} ${alle.length === 1 ? "Aufgabe" : "Aufgaben"} ausgeblendet</button></div>`
+        : `<div class="leer">Nichts offen – alle Aufgaben erledigt.</div>`);
   $("#info-todo").textContent = t ? `${alle.length} offen${t.stand ? " · Stand " + fmtStand(t.stand) : ""}` : "";
   $("#todo-rw").innerHTML = !t ? "" : rw
     ? `<div class="todo-rw-zeile"><button type="button" class="todo-neu-knopf" data-todo-neu>+ Aufgabe</button><span class="todo-rw-status" id="todo-rw-status"></span></div>`
@@ -1675,6 +1687,9 @@ $("#app").addEventListener("click", ev => {
   if(tl){ const kk = tl.closest("[data-todo-karte]"); if(kk) todoLoeschen(kk.dataset.todoKarte); return; }
   const tz = ev.target.closest("[data-todo-zeigen]");
   if(tz){ todoZeigen(tz.dataset.todoZeigen); return; }
+  if(ev.target.closest("button[data-todo-zuruecksetzen]")){
+    TODO.filter.clear(); todoFilterSpeichern(); TODO.suche = ""; $("#todo-suche").value = ""; renderTodo(); return;
+  }
   const tf = ev.target.closest("button[data-todo-filter]");
   if(tf){
     const id = tf.dataset.todoFilter;
@@ -1702,7 +1717,7 @@ $("#app").addEventListener("keydown", ev => {
   if((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches(".todo-karte.klappbar")){ ev.preventDefault(); ev.target.click(); }
 });
 $("#app").addEventListener("input", ev => {
-  if(ev.target.id === "todo-suche"){ TODO.suche = ev.target.value.trim().toLowerCase(); renderTodo(); return; }
+  if(ev.target.id === "todo-suche"){ TODO.suche = todoSuchbegriff(ev.target.value); renderTodo(); return; }
   const s = ev.target.closest("input[data-fm]");
   if(!s) return;
   FM[s.dataset.fm].suche = s.value.trim().toLowerCase();
